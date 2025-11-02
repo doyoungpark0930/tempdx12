@@ -1,0 +1,16 @@
+C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\Animation.cpp;C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\x64\Debug\Animation.obj
+C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\Animator.cpp;C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\x64\Debug\Animator.obj
+C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\Bone.cpp;C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\x64\Debug\Bone.obj
+C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\CbvManager.cpp;C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\x64\Debug\CbvManager.obj
+C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\DDSTextureLoader12.cpp;C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\x64\Debug\DDSTextureLoader12.obj
+C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\DescriptorPool.cpp;C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\x64\Debug\DescriptorPool.obj
+C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\DXUtil.cpp;C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\x64\Debug\DXUtil.obj
+C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\GeometryGenerator.cpp;C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\x64\Debug\GeometryGenerator.obj
+C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\main.cpp;C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\x64\Debug\main.obj
+C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\ModelLoader.cpp;C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\x64\Debug\ModelLoader.obj
+C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\Model.cpp;C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\x64\Debug\Model.obj
+C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\pch.cpp;C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\x64\Debug\pch.obj
+C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\Renderer.cpp;C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\x64\Debug\Renderer.obj
+C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\SrvManager.cpp;C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\x64\Debug\SrvManager.obj
+C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\WICTextureLoader12.cpp;C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\x64\Debug\WICTextureLoader12.obj
+C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\WinApp.cpp;C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\x64\Debug\WinApp.obj

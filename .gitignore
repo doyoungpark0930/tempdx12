@@ -1,0 +1,14 @@
+# Visual Studio user-specific files
+.vs/
+
+# Compiled object files
+*.obj
+*.pch
+*.pdb
+*.ilk
+*.idb
+
+# 단, 특정 pdb는 예외 처리()
+!packages/Microsoft.Direct3D.D3D12.1.616.1/build/native/bin/x64/*.pdb
+!packages/Microsoft.Direct3D.D3D12.1.616.1/build/native/bin/win32/*.pdb
+!packages/Microsoft.Direct3D.D3D12.1.616.1/build/native/bin/arm64/*.pdb

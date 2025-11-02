@@ -1,0 +1,176 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Header Files\pch">
+      <UniqueIdentifier>{a584d856-284f-4aca-a3bd-62d3778c50ec}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ShaderFiles">
+      <UniqueIdentifier>{e9910094-0ca3-4fa0-a081-427adb8224c4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Util">
+      <UniqueIdentifier>{67c0cd3b-cfd5-4031-804f-31ec6f6a51d5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Main">
+      <UniqueIdentifier>{ebd72ced-e99c-4149-8c68-c6d83335d55c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ModelLoader">
+      <UniqueIdentifier>{bedcc393-353c-4087-842a-b2b4ea6094da}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ExternalCode">
+      <UniqueIdentifier>{07968b6c-8e2a-45ce-b4b0-71cb2d6a2f6d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ExternalCode\WICTextureLoader">
+      <UniqueIdentifier>{a7f83749-33b0-4105-a592-f8c3bc776862}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ExternalCode\DirectXTK">
+      <UniqueIdentifier>{8372e9b5-8da9-4d71-9a6f-35702d93f438}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ExternalCode\DDSTextureLoader">
+      <UniqueIdentifier>{50b9e724-a0d9-45ba-b386-fbecc9954bc4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ExternalCode\DirectXMesh">
+      <UniqueIdentifier>{16bcd989-eece-4e7e-8e3b-c595c4947137}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="pch.cpp">
+      <Filter>Header Files\pch</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DXUtil.cpp">
+      <Filter>Util</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>Main</Filter>
+    </ClCompile>
+    <ClCompile Include="WinApp.cpp">
+      <Filter>Main</Filter>
+    </ClCompile>
+    <ClCompile Include="Model.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DescriptorPool.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SrvManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DDSTextureLoader12.cpp">
+      <Filter>ExternalCode\DDSTextureLoader</Filter>
+    </ClCompile>
+    <ClCompile Include="WICTextureLoader12.cpp">
+      <Filter>ExternalCode\WICTextureLoader</Filter>
+    </ClCompile>
+    <ClCompile Include="ModelLoader.cpp">
+      <Filter>ModelLoader</Filter>
+    </ClCompile>
+    <ClCompile Include="GeometryGenerator.cpp">
+      <Filter>ModelLoader</Filter>
+    </ClCompile>
+    <ClCompile Include="CbvManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Animator.cpp">
+      <Filter>ModelLoader</Filter>
+    </ClCompile>
+    <ClCompile Include="Bone.cpp">
+      <Filter>ModelLoader</Filter>
+    </ClCompile>
+    <ClCompile Include="Animation.cpp">
+      <Filter>ModelLoader</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="pch.h">
+      <Filter>Header Files\pch</Filter>
+    </ClInclude>
+    <ClInclude Include="DXHelper.h">
+      <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="DXUtil.h">
+      <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="WinApp.h">
+      <Filter>Main</Filter>
+    </ClInclude>
+    <ClInclude Include="CommonStructs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Model.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DescriptorPool.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SrvManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSTextureLoader12.h">
+      <Filter>ExternalCode\DDSTextureLoader</Filter>
+    </ClInclude>
+    <ClInclude Include="WICTextureLoader12.h">
+      <Filter>ExternalCode\WICTextureLoader</Filter>
+    </ClInclude>
+    <ClInclude Include="ModelLoader.h">
+      <Filter>ModelLoader</Filter>
+    </ClInclude>
+    <ClInclude Include="SimpleMath.h">
+      <Filter>ExternalCode\DirectXTK</Filter>
+    </ClInclude>
+    <ClInclude Include="GeometryGenerator.h">
+      <Filter>ModelLoader</Filter>
+    </ClInclude>
+    <ClInclude Include="CbvManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXMesh.h">
+      <Filter>ExternalCode\DirectXMesh</Filter>
+    </ClInclude>
+    <ClInclude Include="Bone.h">
+      <Filter>ModelLoader</Filter>
+    </ClInclude>
+    <ClInclude Include="Animation.h">
+      <Filter>ModelLoader</Filter>
+    </ClInclude>
+    <ClInclude Include="Animator.h">
+      <Filter>ModelLoader</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+    <None Include="SimpleMath.inl">
+      <Filter>ExternalCode\DirectXTK</Filter>
+    </None>
+    <None Include="DirectXMesh.inl">
+      <Filter>ExternalCode\DirectXMesh</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <CopyFileToFolders Include="VSShader.hlsl">
+      <Filter>ShaderFiles</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="PSShader.hlsl">
+      <Filter>ShaderFiles</Filter>
+    </CopyFileToFolders>
+  </ItemGroup>
+</Project>

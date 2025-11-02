@@ -1,0 +1,8 @@
+C:\Users\Lenovo\source\repos\Dx12Engine\x64\Debug\D3D12\D3D12Core.dll
+C:\Users\Lenovo\source\repos\Dx12Engine\x64\Debug\D3D12\D3D12Core.pdb
+C:\Users\Lenovo\source\repos\Dx12Engine\x64\Debug\D3D12\D3D12SDKLayers.dll
+C:\Users\Lenovo\source\repos\Dx12Engine\x64\Debug\D3D12\D3D12SDKLayers.pdb
+C:\Users\Lenovo\source\repos\BackUpDx12\x64\Debug\D3D12\D3D12Core.dll
+C:\Users\Lenovo\source\repos\BackUpDx12\x64\Debug\D3D12\D3D12Core.pdb
+C:\Users\Lenovo\source\repos\BackUpDx12\x64\Debug\D3D12\D3D12SDKLayers.dll
+C:\Users\Lenovo\source\repos\BackUpDx12\x64\Debug\D3D12\D3D12SDKLayers.pdb
