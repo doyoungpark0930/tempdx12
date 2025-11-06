@@ -496,7 +496,7 @@ void Renderer::CreateModels()
 	WideCharToMultiByte(CP_UTF8, 0, DXUtil::m_assetsResourcesPath, -1, basePath, sizeof(basePath), NULL, NULL); // wchar → MultiByte 변환 (UTF-8 기준)
 	strcat_s(basePath, sizeof(basePath), "Mixamo\\");
 
-	const char* fileName = "ddd.dy";
+	const char* fileName = "assasin.dy";
 
 	MeshDataInfo meshesInfo = GeometryGenerator::testReadFromFile(basePath, fileName);
 

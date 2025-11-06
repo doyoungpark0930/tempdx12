@@ -32,7 +32,7 @@ void SrvManager::OnInit(ID3D12Device* pDevice, Renderer* pRenderer)
 	if (FAILED(m_device->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&m_descritorHeap)))) __debugbreak();
 
 	m_srvContainer = new SRV_CONTAINER[max_descriptorNum];
-	m_textures = new ID3D12Resource * [max_descriptorNum];
+	m_textures = new ID3D12Resource * [max_descriptorNum]; //텍스춰를 pool이아닌 중구난방으로 할당하고있긴함
 
 }
 SRV_CONTAINER SrvManager::CreateTiledTexture()

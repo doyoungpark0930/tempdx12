@@ -88,19 +88,6 @@ maxNode* findNode(maxNode* node, const std::string& name)
 	return nullptr;
 }
 
-void  ModelLoader::deleteNode(maxNode* node)
-{
-	if (node == nullptr)
-		return;
-
-	for (int i = 0; i < node->mNumChildren; ++i)
-	{
-		deleteNode(node->mChildren[i]);
-		node->mChildren[i] = nullptr;
-	}
-
-	delete node;
-}
 
 
 void printNode(maxNode* node, int depth = 0)
@@ -197,13 +184,82 @@ void ParseBoneWeights(char* line, Vertex& vertex)
 	}
 }
 
+void ModelLoader::InsertMtlValue(int allocatedMaterialNum, std::string& mapName, std::string& mapPath)
+{
+	char* albedoTexFilename = nullptr;
+	char* aoTexFilename = nullptr;
+	char* normalTexFilename = nullptr;
+	char* metallicTexFilename = nullptr;
+	char* roughnessTexFilename = nullptr;
+	if (mapName == "base_color_texture")
+	{
+		m_materials[allocatedMaterialNum].albedoTexFilename = new char[mapPath.length() + 1];
+		strcpy_s(m_materials[allocatedMaterialNum].albedoTexFilename, mapPath.length()+1, mapPath.c_str());
+	}
+	else if (mapName == "ao_texture")
+	{
+		m_materials[allocatedMaterialNum].aoTexFilename = new char[mapPath.length() + 1];
+		strcpy_s(m_materials[allocatedMaterialNum].aoTexFilename, mapPath.length()+1, mapPath.c_str());
+	}
+	else if (mapName == "normalmap_texture")
+	{
+		m_materials[allocatedMaterialNum].normalTexFilename = new char[mapPath.length() + 1];
+		strcpy_s(m_materials[allocatedMaterialNum].normalTexFilename, mapPath.length()+1, mapPath.c_str());
+	}
+	else if (mapName == "metallic_texture")
+	{
+		m_materials[allocatedMaterialNum].metallicTexFilename = new char[mapPath.length() + 1];
+		strcpy_s(m_materials[allocatedMaterialNum].metallicTexFilename, mapPath.length()+1, mapPath.c_str());
+	}
+	else if (mapName == "roughness_texture")
+	{
+		m_materials[allocatedMaterialNum].roughnessTexFilename = new char[mapPath.length() + 1];
+		strcpy_s(m_materials[allocatedMaterialNum].roughnessTexFilename, mapPath.length()+1, mapPath.c_str());
+	}
+}
+
+void PrintAllMaterialTextures(material* m_materials, UINT m_materialNum)
+{
+	for (UINT i = 0; i < m_materialNum; ++i)
+	{
+		std::cout << "===== Material " << i << " =====" << std::endl;
+
+		if (m_materials[i].albedoTexFilename)
+			std::cout << "Albedo:    " << m_materials[i].albedoTexFilename << std::endl;
+		else
+			std::cout << "Albedo:    (null)" << std::endl;
+
+		if (m_materials[i].aoTexFilename)
+			std::cout << "AO:        " << m_materials[i].aoTexFilename << std::endl;
+		else
+			std::cout << "AO:        (null)" << std::endl;
+
+		if (m_materials[i].normalTexFilename)
+			std::cout << "Normal:    " << m_materials[i].normalTexFilename << std::endl;
+		else
+			std::cout << "Normal:    (null)" << std::endl;
+
+		if (m_materials[i].metallicTexFilename)
+			std::cout << "Metallic:  " << m_materials[i].metallicTexFilename << std::endl;
+		else
+			std::cout << "Metallic:  (null)" << std::endl;
+
+		if (m_materials[i].roughnessTexFilename)
+			std::cout << "Roughness: " << m_materials[i].roughnessTexFilename << std::endl;
+		else
+			std::cout << "Roughness: (null)" << std::endl;
+
+		std::cout << std::endl;
+	}
+}
+
 void ModelLoader::testLoad(char* basePath, const char* filename)
 {
 	this->basePath = basePath;
 	char fullPath[512];
 	strcpy_s(fullPath, sizeof(fullPath), basePath);
 	strcat_s(fullPath, sizeof(fullPath), filename);
-	meshData = new MeshData;
+
 	FILE* pStream = nullptr;
 	fopen_s(&pStream, fullPath, "r");
 
@@ -215,8 +271,9 @@ void ModelLoader::testLoad(char* basePath, const char* filename)
 	char line[512];
 
 	//Indent
+	int MATERIAL_LIST_Indent = 0;
 	int MATERIAL_Indent = 0;
-	int MAP_GENERIC_indent = 0;
+	int SUBMATERIAL_Indent = 0;
 	int HELPER_indent = 0;
 	int GEOM_indent = 0;
 	int MESH_indent = 0;
@@ -229,8 +286,162 @@ void ModelLoader::testLoad(char* basePath, const char* filename)
 	maxNode* curNode = nullptr;
 	maxNode* beforeNode = nullptr;
 
-	int test = 0;
+	//이전의 material 몇개 할당되었는지
+	int* prevMaterialNum = nullptr;
+	int allocatedMaterialNum = 0; //mtl하나 할당될때마다 하나씩 센다
+
+	int temp = 0;
 	while (fgets_trim(line, sizeof(line), pStream)) {
+
+		//materal, mesh, index개수 받기
+		{
+			startPlace = strstr(line, "usedMaterialCnt");
+			if (startPlace != nullptr)
+			{
+				startPlace += strlen("usedMaterialCnt");
+				int x;
+				if (sscanf_s(startPlace, "%d", &x) == 1)
+				{
+					m_materialNum = x;
+					m_materials = new material[m_materialNum];
+
+				}
+				//mesh
+				fgets_trim(line, sizeof(line), pStream);
+				startPlace = strstr(line, "meshCnt");
+				startPlace += strlen("meshCnt");
+				if (sscanf_s(startPlace, "%d", &x) == 1)
+				{
+					m_meshesNum = x;
+					m_meshes = new mesh[m_meshesNum];
+					for (int i = 0; i < m_materialNum; i++)
+					{
+						m_materials[i].meshNum = m_meshesNum;
+						m_materials[i].index = new UINT * [m_meshesNum];
+						m_materials[i].face_cnt = new UINT[m_meshesNum];
+						memset(m_materials[i].face_cnt, 0, sizeof(UINT) * m_meshesNum);
+					}
+				}
+				for (int i = 0; i < m_meshesNum; i++)
+				{
+					fgets_trim(line, sizeof(line), pStream);
+					startPlace = strstr(line, "indexCnt");
+					startPlace += strlen("indexCnt");
+					if (sscanf_s(startPlace, "%d", &x) == 1)
+					{
+						m_meshes[i].indexNum = x;
+						for (int j = 0; j < m_materialNum; j++)
+						{
+							m_materials[j].index[i] = new UINT[x];
+							memset(m_materials[j].index[i], 0, sizeof(UINT) * x);
+						}
+					}
+				}
+			}
+		}
+
+		//Read MaterialList
+		if (checkTitle(line, "*MATERIAL_LIST", MATERIAL_LIST_Indent))
+		{
+			while (fgets_trim(line, sizeof(line), pStream))
+			{
+				startPlace = strstr(line, "*MATERIAL_COUNT");
+				if (startPlace != nullptr) {
+					startPlace += strlen("*MATERIAL_COUNT");
+					if (sscanf_s(startPlace, "%d", &m_noSubMtlNum) == 1)
+					{
+						prevMaterialNum = new int[m_noSubMtlNum];
+						memset(prevMaterialNum, 0, sizeof(int) * m_noSubMtlNum);
+					}
+					continue;
+
+				}
+
+				if (checkTitle(line, "*MATERIAL ID", MATERIAL_Indent))
+				{
+					startPlace = strstr(line, "*MATERIAL ID");
+					if (startPlace != nullptr) {
+						startPlace += strlen("*MATERIAL ID");
+						int id;
+						if (sscanf_s(startPlace, "%d", &id) == 1)
+						{
+							prevMaterialNum[id] = allocatedMaterialNum;
+						}
+
+					}
+
+					while (fgets_trim(line, sizeof(line), pStream))
+					{
+						//SubMaterial이 있다면
+						if (checkTitle(line, "*SUBMATERIAL", SUBMATERIAL_Indent))
+						{
+							while (fgets_trim(line, sizeof(line), pStream))
+							{
+								if ((startPlace = strstr(line, "*TEXTURE")) != nullptr)
+								{
+									//MAP_NAME
+									fgets_trim(line, sizeof(line), pStream);
+									startPlace = strstr(line, "*MAP_NAME");
+									std::string mapName;
+									FindStr(startPlace, mapName);
+									if (mapName == "normalmap_texture")
+									{
+										fgets_trim(line, sizeof(line), pStream);
+										fgets_trim(line, sizeof(line), pStream);
+									}
+
+									//BITMAP
+									fgets_trim(line, sizeof(line), pStream);
+									startPlace = strstr(line, "*BITMAP");
+									std::string mapPath;
+									FindStr(startPlace, mapPath);
+
+									InsertMtlValue(allocatedMaterialNum, mapName, mapPath);
+								}
+								if (line[SUBMATERIAL_Indent] == '}')
+								{
+									allocatedMaterialNum++;
+									break;
+								}
+							}
+						}
+						//SubMaterial없고 자체 texture라면
+						else if ((startPlace = strstr(line, "*TEXTURE")) != nullptr)
+						{
+							//MAP_NAME
+							fgets_trim(line, sizeof(line), pStream);
+							startPlace = strstr(line, "*MAP_NAME");
+							std::string mapName;
+							FindStr(startPlace, mapName);
+							if (mapName == "normalmap_texture")
+							{
+								fgets_trim(line, sizeof(line), pStream);
+								fgets_trim(line, sizeof(line), pStream);
+							}
+
+							//BITMAP
+							fgets_trim(line, sizeof(line), pStream);
+							startPlace = strstr(line, "*BITMAP");
+							std::string mapPath;
+							FindStr(startPlace, mapPath);
+
+							InsertMtlValue(allocatedMaterialNum, mapName, mapPath);
+						}
+
+						if (line[MATERIAL_Indent] == '}')
+						{
+							allocatedMaterialNum++;
+							break;
+						}
+					}
+				}
+
+				if (line[MATERIAL_LIST_Indent] == '}')
+				{
+					break;
+				}
+			}
+		}
 
 		//HelperObject
 		if (checkTitle(line, "*HELPEROBJECT", HELPER_indent))
@@ -263,6 +474,7 @@ void ModelLoader::testLoad(char* basePath, const char* filename)
 						int childNum = beforeNode->mNumChildren;
 						beforeNode->mChildren[childNum] = curNode;
 						beforeNode->mNumChildren++;
+						if (beforeNode->mNumChildren > 20) __debugbreak(); //최대자식 수 넘어감. maxNode에서 설정
 					}
 					else
 					{
@@ -273,6 +485,7 @@ void ModelLoader::testLoad(char* basePath, const char* filename)
 						int childNum = parentNode->mNumChildren;
 						parentNode->mChildren[childNum] = curNode;
 						parentNode->mNumChildren++;
+						if (parentNode->mNumChildren > 20) __debugbreak(); //최대자식 수 넘어감. maxNode에서 설정
 					}
 					continue;
 				}
@@ -356,15 +569,15 @@ void ModelLoader::testLoad(char* basePath, const char* filename)
 							int x;
 							if (sscanf_s(startPlace, "%d", &x) == 1)
 							{
-								meshData->verticesNum = x * 3;
-								meshData->indicesNum = x * 3;
-								meshData->vertices = new Vertex[x * 3];
-								meshData->indices = new UINT[x * 3];
+								//meshData->verticesNum = x * 3;
+								//meshData->indicesNum = x * 3;
+								//meshData->vertices = new Vertex[x * 3];
+								//->indices = new UINT[x * 3];
 
 								for (int i = 0; i < x * 3; i++)
 								{
-									meshData->indices[i] = i;
-									SetVertexBoneDataToDefault(meshData->vertices[i]);
+									//meshData->indices[i] = i;
+									//SetVertexBoneDataToDefault(meshData->vertices[i]);
 								}
 
 							}
@@ -383,21 +596,21 @@ void ModelLoader::testLoad(char* basePath, const char* filename)
 								fgets_trim(line, sizeof(line), pStream); //mtl ID
 
 								fgets_trim(line, sizeof(line), pStream); //vertex
-								ParseVertexLine(line, meshData->vertices[index]);
+								//ParseVertexLine(line, meshData->vertices[index]);
 								fgets_trim(line, sizeof(line), pStream); //weight
-								ParseBoneWeights(line, meshData->vertices[index]);
+								//ParseBoneWeights(line, meshData->vertices[index]);
 								index++;
 
 								fgets_trim(line, sizeof(line), pStream);//vertex
-								ParseVertexLine(line, meshData->vertices[index]);
+								//ParseVertexLine(line, meshData->vertices[index]);
 								fgets_trim(line, sizeof(line), pStream);//weight
-								ParseBoneWeights(line, meshData->vertices[index]);
+								//ParseBoneWeights(line, meshData->vertices[index]);
 								index++;
 
 								fgets_trim(line, sizeof(line), pStream);//vertex
-								ParseVertexLine(line, meshData->vertices[index]);
+								//ParseVertexLine(line, meshData->vertices[index]);
 								fgets_trim(line, sizeof(line), pStream);//weight
-								ParseBoneWeights(line, meshData->vertices[index]);
+								//ParseBoneWeights(line, meshData->vertices[index]);
 								index++;
 							}
 						}
@@ -424,7 +637,7 @@ void ModelLoader::testLoad(char* basePath, const char* filename)
 			while (fgets_trim(line, sizeof(line), pStream))
 			{
 				FindStr(line, boneName);
-				if (sscanf_s(line + boneName.size()+3, "%d", &boneId) == 1)
+				if (sscanf_s(line + boneName.size() + 3, "%d", &boneId) == 1)
 				{
 					m_boneInfoMap[boneName] = boneId;
 				}
@@ -439,9 +652,15 @@ void ModelLoader::testLoad(char* basePath, const char* filename)
 	}
 
 
-
+	//cout << m_materialNum << endl;
+	//cout << m_meshesNum << endl;
 	//printNode(rootNode, 0);
-
+	PrintAllMaterialTextures(m_materials, m_materialNum);
+	for (int i = 0; i < m_noSubMtlNum; i++)
+	{
+		cout << i << " " << prevMaterialNum[i] << endl;
+	}
+	if (prevMaterialNum) delete[] prevMaterialNum;
 	fclose(pStream);
 }
 

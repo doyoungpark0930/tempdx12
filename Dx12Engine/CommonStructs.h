@@ -68,53 +68,112 @@ struct CBV_CONTAINER
 	D3D12_CPU_DESCRIPTOR_HANDLE	CBVHandle;
 };
 
-struct Mesh
-{
-	D3D12_VERTEX_BUFFER_VIEW m_vertexBufferView;
-	D3D12_INDEX_BUFFER_VIEW m_indexBufferView;
-	SRV_CONTAINER* srvContainer = nullptr;
-
-	UINT indexCount = 0;
-	UINT srvNum = 0;
-};
-
-struct MeshData {
-	Vertex* vertices = nullptr;
-	UINT* indices = nullptr;
-
-	UINT verticesNum = 0;
-	UINT indicesNum = 0;
-};
-
 struct maxNode
 {
 	std::string name;
 	Matrix localTransform;
 	Matrix offset;
 	int mNumChildren = 0;
-	maxNode* mChildren[5]; //최대 자식 수 5개
+	maxNode* mChildren[20]; //최대 자식 수 20개
 	maxNode* mParent = nullptr;
 };
 
-class Animation;
-struct MeshDataInfo {
-	MeshData* meshes = nullptr;
-	UINT meshCount = 1;
-	Animation* m_animations = nullptr;
-	UINT animationCnt = 0;
-	Matrix m_defaultTransform;
-	Matrix* finalBoneMatrices = nullptr;
-	UINT matricesNum = 0;
+struct TRI_GROUP_PER_MTL
+{
+	ID3D12Resource* pIndexBuffer = nullptr;
+	D3D12_INDEX_BUFFER_VIEW IndexBufferView = {};
+	UINT	triCount = 0;
 
-	maxNode* rootNode = nullptr;
+	//material에 맞춰, indexbuffer, view도 동적배열로
 
-	//직접 입력하는 대신, 텍스춰파일하나를 모든 메쉬가 참조하는 구조
+	//albedo, normal , metallic 등
+	SRV_CONTAINER* srvContainer = nullptr;
+	UINT srvNum = 0;
+};
+
+struct material // material* Materials = new [50];만들고, mtl읽을때 다 채워넣는다
+{//face에서 mtlid만나면, Materials[id]->index[face_cnt*3+0], [face_cnt*3+1],[face_cnt*3+2]에 index값 넣어주고, face_cnt++;해주기
+	//emission이라든지 여기에 없는 char*가 들어오면 그거는 무시하고 안 넣으면 됨
 	char* albedoTexFilename = nullptr;
 	char* aoTexFilename = nullptr;
 	char* normalTexFilename = nullptr;
 	char* metallicTexFilename = nullptr;
 	char* roughnessTexFilename = nullptr;
 
-	//직접 입력해야하는 텍스춰라면
-	bool hasManualTextureInput = false;
+	UINT meshNum = 0;
+	UINT** index = nullptr; //2차원배열. 일단 이렇게 되나 보고, 이거 vector pushback 내가 직접만들어야겟다
+	//mesh[0] -> index 1, 2 ,3 ,4, 5, 6
+	//mesh[1] -> index 1, 2 ,3 ,4, 5, 6
+	//mesh[2] -> index 1, 2 ,3 ,4, 5, 6
+	//face cnt는 6개
+	//IASetVertex[0]할당하고 index쫙
+	//IASetVertex[1]할당하고 index쫙 => 이것들을 tri로는 어떻게 잘 넣을지 생각
+
+	UINT* face_cnt = nullptr;
+	
+	~material()
+	{
+		if (index)  
+		{
+			for (UINT i = 0; i < meshNum; ++i)
+			{
+				delete[] index[i]; 
+			}
+			delete[] index;         
+			index = nullptr;
+		}
+		if (face_cnt)
+		{
+			delete[] face_cnt;
+		}
+		if (albedoTexFilename)
+		{
+			delete[] albedoTexFilename;
+		}
+		if (aoTexFilename)
+		{
+			delete[] aoTexFilename;
+		}
+		if (normalTexFilename)
+		{
+			delete[] normalTexFilename;
+		}
+		if (metallicTexFilename)
+		{
+			delete[] metallicTexFilename;
+		}
+		if (roughnessTexFilename)
+		{
+			delete[] roughnessTexFilename;
+		}
+		
+	}
+};
+
+struct mesh //일단 이렇게 확실히 mesh로 나누어야함. 이렇게 안하면 각 mesh의 index가 vertex를 참조못함
+{
+	Vertex* vertices = nullptr;
+	UINT verticesNum = 0; 
+	UINT indexNum = 0;
+};
+
+class Animation;
+struct MeshDataInfo {
+	Vertex* vertices = nullptr;
+	UINT verticesNum = 0;
+
+	maxNode* rootNode = nullptr;
+	material* Materials = nullptr;
+	UINT materialNum = 0;
+
+	mesh* meshes = nullptr;
+	UINT meshNum = 0;
+
+	//animation
+	Animation* m_animations = nullptr;
+	UINT animationCnt = 0;
+	Matrix m_defaultTransform;
+	Matrix* finalBoneMatrices = nullptr;
+	UINT matricesNum = 0;
+
 };

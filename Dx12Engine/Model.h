@@ -6,6 +6,7 @@ class SrvManager;
 class CbvManger;
 class Animation;
 
+
 class Model
 {
 public:
@@ -31,11 +32,12 @@ private:
 	ID3D12Fence* m_fence = nullptr;
 	UINT64* m_fenceValue = nullptr;
 
+	D3D12_VERTEX_BUFFER_VIEW m_vertexBufferView;
+	TRI_GROUP_PER_MTL* m_TriGroupList = nullptr;
+	UINT m_materialNum = 0;
+
 	UINT descriptorSize;
 
-
-	UINT meshNum = 0;
-	Mesh* m_Meshes = nullptr;
 	UINT texNum = 5;
 
 	//animation
@@ -45,10 +47,6 @@ private:
 	UINT m_matricesNum = 0;
 	Animation* m_animations = nullptr;
 
-	//직접 입력해야하는 텍스춰라면
-	bool m_hasManualTextureInput = false;
-	SRV_CONTAINER* m_manualTextureContainer = nullptr;
-	UINT m_menualSrvCnt = 0;
 
 	void UpdateMembers();
 	void WaitForPreviousFrame();
