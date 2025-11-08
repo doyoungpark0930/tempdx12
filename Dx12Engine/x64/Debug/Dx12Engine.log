@@ -1,20 +1,20 @@
-﻿  Renderer.cpp
+﻿  ModelLoader.cpp
 C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\Animation.h(26,47): warning C4244: 'return': conversion from 'int' to 'float', possible loss of data
-  (compiling source file '/Renderer.cpp')
+  (compiling source file '/ModelLoader.cpp')
   
-C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\Renderer.cpp(168,77): warning C4390: ';': empty controlled statement found; is this the intent?
-  (compiling source file '/Renderer.cpp')
+C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\ModelLoader.cpp(40,21): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+  (compiling source file '/ModelLoader.cpp')
   
-C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\Renderer.cpp(548,36): warning C4305: '=': truncation from 'double' to 'float'
-  (compiling source file '/Renderer.cpp')
+C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\ModelLoader.cpp(70,25): warning C4244: '=': conversion from '__int64' to 'int', possible loss of data
+  (compiling source file '/ModelLoader.cpp')
   
-C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\Renderer.cpp(549,36): warning C4305: '=': truncation from 'double' to 'float'
-  (compiling source file '/Renderer.cpp')
+C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\ModelLoader.cpp(360,24): warning C4018: '<': signed/unsigned mismatch
+  (compiling source file '/ModelLoader.cpp')
   
-C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\Renderer.cpp(555,36): warning C4305: '=': truncation from 'double' to 'float'
-  (compiling source file '/Renderer.cpp')
+C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\ModelLoader.cpp(368,23): warning C4018: '<': signed/unsigned mismatch
+  (compiling source file '/ModelLoader.cpp')
   
-C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\Renderer.cpp(562,36): warning C4305: '=': truncation from 'double' to 'float'
-  (compiling source file '/Renderer.cpp')
+C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\ModelLoader.cpp(377,25): warning C4018: '<': signed/unsigned mismatch
+  (compiling source file '/ModelLoader.cpp')
   
   Dx12Engine.vcxproj -> C:\Users\Lenovo\source\repos\BackUpDx12\x64\Debug\Dx12Engine.exe

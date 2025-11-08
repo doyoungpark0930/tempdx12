@@ -91,9 +91,8 @@ struct TRI_GROUP_PER_MTL
 	UINT srvNum = 0;
 };
 
-struct material // material* Materials = new [50];만들고, mtl읽을때 다 채워넣는다
-{//face에서 mtlid만나면, Materials[id]->index[face_cnt*3+0], [face_cnt*3+1],[face_cnt*3+2]에 index값 넣어주고, face_cnt++;해주기
-	//emission이라든지 여기에 없는 char*가 들어오면 그거는 무시하고 안 넣으면 됨
+struct material 
+{
 	char* albedoTexFilename = nullptr;
 	char* aoTexFilename = nullptr;
 	char* normalTexFilename = nullptr;
@@ -101,13 +100,7 @@ struct material // material* Materials = new [50];만들고, mtl읽을때 다 채워넣는�
 	char* roughnessTexFilename = nullptr;
 
 	UINT meshNum = 0;
-	UINT** index = nullptr; //2차원배열. 일단 이렇게 되나 보고, 이거 vector pushback 내가 직접만들어야겟다
-	//mesh[0] -> index 1, 2 ,3 ,4, 5, 6
-	//mesh[1] -> index 1, 2 ,3 ,4, 5, 6
-	//mesh[2] -> index 1, 2 ,3 ,4, 5, 6
-	//face cnt는 6개
-	//IASetVertex[0]할당하고 index쫙
-	//IASetVertex[1]할당하고 index쫙 => 이것들을 tri로는 어떻게 잘 넣을지 생각
+	UINT** index = nullptr; //첫번째 괄호는 mesh순서에 해당
 
 	UINT* face_cnt = nullptr;
 	
@@ -154,7 +147,6 @@ struct mesh //일단 이렇게 확실히 mesh로 나누어야함. 이렇게 안하면 각 mesh의 inde
 {
 	Vertex* vertices = nullptr;
 	UINT verticesNum = 0; 
-	UINT indexNum = 0;
 };
 
 class Animation;
