@@ -4,6 +4,7 @@ using namespace DirectX;
 using namespace DirectX::SimpleMath;
 
 #define MAX_BONE_INFLUENCE 4
+#define MAX_TEXTURE_NUM 5
 
 struct Vertex
 {
@@ -58,7 +59,7 @@ struct ObjectState
 
 struct SRV_CONTAINER
 {
-	ID3D12Resource* pSrvResource;
+	ID3D12Resource* pSrvResource = nullptr;
 	CD3DX12_CPU_DESCRIPTOR_HANDLE srvHandle;
 };
 
@@ -80,15 +81,11 @@ struct maxNode
 
 struct TRI_GROUP_PER_MTL
 {
-	ID3D12Resource* pIndexBuffer = nullptr;
-	D3D12_INDEX_BUFFER_VIEW IndexBufferView = {};
-	UINT	triCount = 0;
+	D3D12_INDEX_BUFFER_VIEW* IndexBufferView = nullptr;
+	UINT* triNum = nullptr;
+	UINT usedMeshNum = 0;
 
-	//material에 맞춰, indexbuffer, view도 동적배열로
-
-	//albedo, normal , metallic 등
 	SRV_CONTAINER* srvContainer = nullptr;
-	UINT srvNum = 0;
 };
 
 struct material 
@@ -99,22 +96,14 @@ struct material
 	char* metallicTexFilename = nullptr;
 	char* roughnessTexFilename = nullptr;
 
-	UINT meshNum = 0;
 	UINT** index = nullptr; //첫번째 괄호는 mesh순서에 해당
 
-	UINT* face_cnt = nullptr;
+	UINT* face_cnt = nullptr; //mesh당 face가 몇개 그려졌는지
 	
+	//필요할 때 model에서 미리미리 제거하자
 	~material()
 	{
-		if (index)  
-		{
-			for (UINT i = 0; i < meshNum; ++i)
-			{
-				delete[] index[i]; 
-			}
-			delete[] index;         
-			index = nullptr;
-		}
+
 		if (face_cnt)
 		{
 			delete[] face_cnt;
@@ -151,13 +140,15 @@ struct mesh //일단 이렇게 확실히 mesh로 나누어야함. 이렇게 안하면 각 mesh의 inde
 
 class Animation;
 struct MeshDataInfo {
-	Vertex* vertices = nullptr;
-	UINT verticesNum = 0;
 
+	//helperNode
 	maxNode* rootNode = nullptr;
+
+	//MaterialArray
 	material* Materials = nullptr;
 	UINT materialNum = 0;
 
+	//MeshArray
 	mesh* meshes = nullptr;
 	UINT meshNum = 0;
 

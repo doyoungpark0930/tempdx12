@@ -126,20 +126,45 @@ void Model::CreateModel(MeshDataInfo meshesInfo, bool useNormalMap)
 {
 	rootNode = meshesInfo.rootNode;
 	m_materialNum = meshesInfo.materialNum;
-	//m_TriGroupList = new TRI_GROUP_PER_MTL[m_materialNum]; //디버깅중 누수맘에안들어서 일단 주석
-
-	m_vertexBufferView = CreateVertexBuffer(meshesInfo.vertices, meshesInfo.verticesNum);
-	/*(for (int i = 0; i < m_materialNum; i++)
+	m_meshNum = meshesInfo.meshNum;
+	m_TriGroupList = new TRI_GROUP_PER_MTL[m_materialNum];
+	for (int i = 0; i < m_materialNum; i++)
 	{
-		m_TriGroupList[i].triCount = meshesInfo.Materials[i].face_cnt;
-		m_TriGroupList[i].IndexBufferView = CreateIndexBuffer(meshesInfo.Materials[i].index, m_TriGroupList[i].triCount * 3);
-		//뭐이쯤해놨으니 대충, createtexture여기서 하고 잘넣고 draw에서 잘처리해서 하쇼
+		m_TriGroupList[i].srvContainer = new SRV_CONTAINER[MAX_TEXTURE_NUM];
 		if (meshesInfo.Materials[i].albedoTexFilename)
-			CreateTextureFromName(meshesInfo.meshes[i].albedoTexFilename, m_Meshes[i].srvContainer, &m_Meshes[i].srvNum);
+			CreateTextureFromName(meshesInfo.Materials[i].albedoTexFilename, m_TriGroupList[i].srvContainer[0]);
+		if (meshesInfo.Materials[i].aoTexFilename)
+			CreateTextureFromName(meshesInfo.Materials[i].aoTexFilename, m_TriGroupList[i].srvContainer[1]);
 		if (meshesInfo.Materials[i].normalTexFilename)
-			..
+			CreateTextureFromName(meshesInfo.Materials[i].normalTexFilename, m_TriGroupList[i].srvContainer[2]);
+		if (meshesInfo.Materials[i].metallicTexFilename)
+			CreateTextureFromName(meshesInfo.Materials[i].metallicTexFilename, m_TriGroupList[i].srvContainer[3]);
+		if (meshesInfo.Materials[i].roughnessTexFilename)
+			CreateTextureFromName(meshesInfo.Materials[i].roughnessTexFilename, m_TriGroupList[i].srvContainer[4]);
 
-	}*/
+		int usedMeshNum = 0;
+		m_TriGroupList[i].IndexBufferView = new D3D12_INDEX_BUFFER_VIEW[m_meshNum];
+		m_TriGroupList[i].triNum = new UINT[m_meshNum];
+		for (int j = 0; j < m_meshNum; j++)
+		{
+			if (meshesInfo.Materials[i].face_cnt[j] > 0)
+			{
+				m_TriGroupList[i].triNum[j] = meshesInfo.Materials[i].face_cnt[j];
+				m_TriGroupList[i].IndexBufferView[j] = CreateIndexBuffer(meshesInfo.Materials[i].index[j], m_TriGroupList[i].triNum[j] * 3);
+				usedMeshNum++;
+			}
+			m_TriGroupList[i].triNum[j] = meshesInfo.Materials[i].face_cnt[j];
+		}
+		m_TriGroupList[i].usedMeshNum = usedMeshNum;
+	}
+
+	m_vertexBufferView = new D3D12_VERTEX_BUFFER_VIEW[m_meshNum];
+	for (int i = 0; i < m_meshNum; i++)
+	{
+		m_vertexBufferView[i] = CreateVertexBuffer(meshesInfo.meshes[i].vertices, meshesInfo.meshes[i].verticesNum);
+	}
+
+
 
 	if (meshesInfo.m_animations)
 	{
@@ -152,22 +177,32 @@ void Model::CreateModel(MeshDataInfo meshesInfo, bool useNormalMap)
 	m_useNormalMap = useNormalMap;
 
 
+	for (int i = 0; i < m_meshNum; i++)
+	{
+		SafeDeleteArray(&meshesInfo.meshes[i].vertices);
+	}
 
-	SafeDeleteArray(&meshesInfo.vertices);
 	for (int i = 0; i < m_materialNum; i++)
 	{
-		SafeDeleteArray(&meshesInfo.Materials[i].index);
+		SafeDeleteArray(&meshesInfo.Materials[i].albedoTexFilename);
+		SafeDeleteArray(&meshesInfo.Materials[i].aoTexFilename);
+		SafeDeleteArray(&meshesInfo.Materials[i].normalTexFilename);
+		SafeDeleteArray(&meshesInfo.Materials[i].metallicTexFilename);
+		SafeDeleteArray(&meshesInfo.Materials[i].roughnessTexFilename);
+
+
+		//SafeDeleteArray(meshesInfo.Materials[i].index); 여기인덱스는 잘해제안될듯
 	}
 
 }
-void Model::CreateTextureFromName(char* textureFilename, SRV_CONTAINER* srvContainer, UINT* srvCnt)
+void Model::CreateTextureFromName(char* textureFilename, SRV_CONTAINER& srvContainer)
 {
 	if (textureFilename)
 	{
 		wchar_t PathName[256];
 		MultiByteToWideChar(CP_UTF8, 0, textureFilename, -1, PathName, 256);
 
-		srvContainer[(*srvCnt)++] = m_srvManager->CreateTexture(PathName);
+		srvContainer = m_srvManager->CreateTexture(PathName);
 	}
 }
 
@@ -210,7 +245,7 @@ void Model::Draw(const Matrix* pMatrix)
 	CD3DX12_GPU_DESCRIPTOR_HANDLE gpuDescriptorTable = {};
 	CD3DX12_CPU_DESCRIPTOR_HANDLE cpuDescriptorTable = {};
 
-	UINT requiredDescriptorCount = 1 + 1 + m_materialNum * texNum; //model행렬(1)+ animationMatrices(1) + srv의 개수
+	UINT requiredDescriptorCount = 1 + 1 + m_materialNum * MAX_TEXTURE_NUM; //model행렬(1)+ animationMatrices(1) + srv의 개수
 	m_descriptorPool->AllocDescriptorTable(&cpuDescriptorTable, &gpuDescriptorTable, requiredDescriptorCount);
 
 	// modelCBV
@@ -229,7 +264,7 @@ void Model::Draw(const Matrix* pMatrix)
 		gpuDescriptorTable.Offset(1, descriptorSize);
 	}
 
-	m_commandList->IASetVertexBuffers(0, 1, &m_vertexBufferView);
+	//m_commandList->IASetVertexBuffers(0, 1, &m_vertexBufferView);
 	m_commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	// modelCBV / mtl[0]{albeo,ao,metallic..} / mtl[1]{albedo, ao, metallic..} /..
@@ -239,8 +274,8 @@ void Model::Draw(const Matrix* pMatrix)
 	for (int i = 0; i < m_materialNum; i++)
 	{
 		TRI_GROUP_PER_MTL* pTriGroup = m_TriGroupList + i;
-		m_commandList->IASetIndexBuffer(&pTriGroup->IndexBufferView);
-		m_commandList->DrawIndexedInstanced(pTriGroup->triCount * 3, 1, 0, 0, 0);
+		//m_commandList->IASetIndexBuffer(&pTriGroup->IndexBufferView);
+		//m_commandList->DrawIndexedInstanced(pTriGroup->triCount * 3, 1, 0, 0, 0);
 	}
 
 

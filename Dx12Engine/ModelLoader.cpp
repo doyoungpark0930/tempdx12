@@ -35,267 +35,6 @@ using namespace std;
 using namespace DirectX::SimpleMath;
 
 
-bool fgets_trim(char* buffer, size_t size, FILE* stream)
-{
-	if (!fgets(buffer, size, stream))
-		return false;
-
-	size_t len = strlen(buffer);
-	if (len > 0 && buffer[len - 1] == '\n')
-		buffer[len - 1] = '\0';
-
-	return true;
-}
-
-void FindStr(char* startPlace, std::string& dest)
-{
-	char* start = strchr(startPlace, '"');
-	if (start)
-	{
-		start++; // 큰따옴표 다음 문자
-
-		char* end = strchr(start, '"');
-		if (end)
-		{
-			dest.assign(start, end - start); // 문자열 구간 복사
-		}
-	}
-}
-
-inline bool checkTitle(char* line, const char* str, int& currentIndent)
-{
-	char* start = strstr(line, str);
-
-	if (start) {
-		currentIndent = start - line;
-		return true;
-	}
-	return false;
-
-}
-
-maxNode* findNode(maxNode* node, const std::string& name)
-{
-	if (node->name == name) return node;
-
-	maxNode* targetNode = nullptr;
-	for (int i = 0; i < node->mNumChildren; i++)
-	{
-		targetNode = findNode(node->mChildren[i], name);
-		if (targetNode) return targetNode;
-	}
-
-	return nullptr;
-}
-
-
-
-void printNode(maxNode* node, int depth = 0)
-{
-	if (!node)
-		return;
-
-	// 부모-자식 구조 들여쓰기
-	for (int i = 0; i < depth; ++i)
-		std::cout << "  ";
-
-	std::cout << "└─ " << node->name << " (" << node->mNumChildren << " children)" << std::endl;
-
-	// transformation 출력 (4x4)
-	for (int r = 0; r < 4; ++r)
-	{
-		for (int i = 0; i < depth + 1; ++i) // 들여쓰기
-			std::cout << "  ";
-
-		for (int c = 0; c < 4; ++c)
-		{
-			std::cout << node->localTransform.m[r][c] << " ";
-		}
-		std::cout << std::endl;
-	}
-
-	// 자식 노드 재귀 출력
-	for (int i = 0; i < node->mNumChildren; ++i)
-	{
-		printNode(node->mChildren[i], depth + 1);
-	}
-}
-
-
-inline void ModelLoader::ParseVertexLine(const char* startPlace, Vertex* vertex, int meshCnt, int mtlID, int index)
-{
-	float x[11];
-	//position, uv, normal, tangent순
-	if (sscanf_s(startPlace, "%f %f %f %f %f %f %f %f %f %f %f",
-		&x[0], &x[1], &x[2], &x[3], &x[4],
-		&x[5], &x[6], &x[7], &x[8], &x[9], &x[10]) == 11)
-	{
-		if (vertex != nullptr)
-		{
-			vertex->Pos = { x[0], x[1], x[2] };
-			vertex->Tex = { x[3], x[4] };
-			vertex->Normal = { x[5], x[6], x[7] };
-			vertex->tangent = { x[8], x[9], x[10] };
-		}
-		else __debugbreak();
-	}
-
-	int face_cnt = m_materials[mtlID].face_cnt[meshCnt];
-	m_materials[mtlID].index[meshCnt][face_cnt * 3 + index % 3] = index;
-}
-
-char* findNthNumberStart(char* line, int n)
-{
-	char* ptr = line;
-	int count = 0;
-
-	while (*ptr != '\0') // 문자열 끝날 때까지
-	{
-		// 숫자나 '-'(음수 표시)가 나오면 숫자의 시작 가능성
-		if (isdigit(*ptr) || *ptr == '-' || *ptr == '.')
-		{
-			// 앞이 공백이거나 문자열의 시작이라면 진짜 숫자 시작
-			if (ptr == line || isspace(*(ptr - 1)))
-			{
-				count++;
-				if (count == n)
-					return ptr; // n번째 숫자의 시작 주소 반환
-			}
-		}
-
-		ptr++;
-	}
-
-	return nullptr; // 못 찾은 경우
-}
-
-inline void ModelLoader::ParseBoneWeights(char* line, Vertex* vertex)
-{
-	int weightNum = 0;
-	char* startPlace = nullptr;
-	if (sscanf_s(line, "%d", &weightNum) == 1)
-	{
-		float weight = 0.0f;
-		int boneID = 255;
-		if (weightNum != 0) startPlace = findNthNumberStart(line, 2); // 첫 float 앞
-		for (int i = 0; i < weightNum; i++)
-		{
-			if (sscanf_s(startPlace, "%f %d", &weight, &boneID) == 2)
-			{
-				if (vertex != nullptr)
-				{
-					vertex->m_Weights[i] = weight;
-					vertex->m_BoneIDs[i] = static_cast<uint8_t>(boneID);
-				}
-				else __debugbreak();
-			}
-
-			startPlace = findNthNumberStart(startPlace, 3); // 다음 float,int 쌍
-		}
-	}
-}
-
-void ModelLoader::InsertMtlValue(int allocatedMaterialNum, std::string& mapName, std::string& mapPath)
-{
-	char* albedoTexFilename = nullptr;
-	char* aoTexFilename = nullptr;
-	char* normalTexFilename = nullptr;
-	char* metallicTexFilename = nullptr;
-	char* roughnessTexFilename = nullptr;
-	if (mapName == "base_color_texture")
-	{
-		m_materials[allocatedMaterialNum].albedoTexFilename = new char[mapPath.length() + 1];
-		strcpy_s(m_materials[allocatedMaterialNum].albedoTexFilename, mapPath.length() + 1, mapPath.c_str());
-	}
-	else if (mapName == "ao_texture")
-	{
-		m_materials[allocatedMaterialNum].aoTexFilename = new char[mapPath.length() + 1];
-		strcpy_s(m_materials[allocatedMaterialNum].aoTexFilename, mapPath.length() + 1, mapPath.c_str());
-	}
-	else if (mapName == "normalmap_texture")
-	{
-		m_materials[allocatedMaterialNum].normalTexFilename = new char[mapPath.length() + 1];
-		strcpy_s(m_materials[allocatedMaterialNum].normalTexFilename, mapPath.length() + 1, mapPath.c_str());
-	}
-	else if (mapName == "metallic_texture")
-	{
-		m_materials[allocatedMaterialNum].metallicTexFilename = new char[mapPath.length() + 1];
-		strcpy_s(m_materials[allocatedMaterialNum].metallicTexFilename, mapPath.length() + 1, mapPath.c_str());
-	}
-	else if (mapName == "roughness_texture")
-	{
-		m_materials[allocatedMaterialNum].roughnessTexFilename = new char[mapPath.length() + 1];
-		strcpy_s(m_materials[allocatedMaterialNum].roughnessTexFilename, mapPath.length() + 1, mapPath.c_str());
-	}
-}
-
-void PrintAllMaterialTextures(material* m_materials, UINT m_materialNum)
-{
-	for (UINT i = 0; i < m_materialNum; ++i)
-	{
-		std::cout << "===== Material " << i << " =====" << std::endl;
-
-		if (m_materials[i].albedoTexFilename)
-			std::cout << "Albedo:    " << m_materials[i].albedoTexFilename << std::endl;
-		else
-			std::cout << "Albedo:    (null)" << std::endl;
-
-		if (m_materials[i].aoTexFilename)
-			std::cout << "AO:        " << m_materials[i].aoTexFilename << std::endl;
-		else
-			std::cout << "AO:        (null)" << std::endl;
-
-		if (m_materials[i].normalTexFilename)
-			std::cout << "Normal:    " << m_materials[i].normalTexFilename << std::endl;
-		else
-			std::cout << "Normal:    (null)" << std::endl;
-
-		if (m_materials[i].metallicTexFilename)
-			std::cout << "Metallic:  " << m_materials[i].metallicTexFilename << std::endl;
-		else
-			std::cout << "Metallic:  (null)" << std::endl;
-
-		if (m_materials[i].roughnessTexFilename)
-			std::cout << "Roughness: " << m_materials[i].roughnessTexFilename << std::endl;
-		else
-			std::cout << "Roughness: (null)" << std::endl;
-
-		std::cout << std::endl;
-	}
-}
-
-void ModelLoader::ReadMapInfo(FILE* pStream, int allocatedMaterialNum)
-{
-	char line[512];
-	char* startPlace = nullptr;
-
-	std::string mapName;
-	std::string mapPath;
-
-	// MAP_NAME 읽기
-	fgets_trim(line, sizeof(line), pStream);
-	startPlace = strstr(line, "*MAP_NAME");
-	if (startPlace)
-		FindStr(startPlace, mapName);
-
-	// normalmap_texture의 경우 MAP_CLASS 두 줄을 추가로 스킵
-	if (mapName == "normalmap_texture")
-	{
-		fgets_trim(line, sizeof(line), pStream);
-		fgets_trim(line, sizeof(line), pStream);
-	}
-
-	// BITMAP 읽기
-	fgets_trim(line, sizeof(line), pStream);
-	startPlace = strstr(line, "*BITMAP");
-	if (startPlace)
-		FindStr(startPlace, mapPath);
-
-	// 재질에 삽입
-	InsertMtlValue(allocatedMaterialNum, mapName, mapPath);
-}
-
-
 void ModelLoader::testLoad(char* basePath, const char* filename)
 {
 	this->basePath = basePath;
@@ -359,7 +98,6 @@ void ModelLoader::testLoad(char* basePath, const char* filename)
 					m_meshes = new mesh[m_meshesNum];
 					for (int i = 0; i < m_materialNum; i++)
 					{
-						m_materials[i].meshNum = m_meshesNum;
 						m_materials[i].index = new UINT * [m_meshesNum];
 						m_materials[i].face_cnt = new UINT[m_meshesNum];
 						memset(m_materials[i].face_cnt, 0, sizeof(UINT) * m_meshesNum);
@@ -650,7 +388,7 @@ void ModelLoader::testLoad(char* basePath, const char* filename)
 		}
 
 	}
-
+	UpdateResourcePath(m_materials, m_materialNum);
 	//cout << m_materialNum << endl;
 	//cout << m_meshesNum << endl;
 	//printNode(rootNode, 0);
@@ -660,24 +398,28 @@ void ModelLoader::testLoad(char* basePath, const char* filename)
 }
 
 
-
-
-
-
-
-
-char* ModelLoader::ReadTextureFilename(aiMaterial* material, UINT type)
+//Resource파일 경로로 바꿔줌
+void ModelLoader::UpdateResourcePath(material* m_materials, UINT m_materialNum)
 {
-	if (material->GetTextureCount(static_cast<aiTextureType>(type)) > 0) {
-		aiString filepath;
-		material->GetTexture(static_cast<aiTextureType>(type), 0, &filepath);
+	for (UINT i = 0; i < m_materialNum; ++i)
+	{
+		m_materials[i].albedoTexFilename = UpdatePath(m_materials[i].albedoTexFilename);
+		m_materials[i].aoTexFilename = UpdatePath(m_materials[i].aoTexFilename);
+		m_materials[i].metallicTexFilename = UpdatePath(m_materials[i].metallicTexFilename);
+		m_materials[i].normalTexFilename = UpdatePath(m_materials[i].normalTexFilename);
+		m_materials[i].roughnessTexFilename = UpdatePath(m_materials[i].roughnessTexFilename);
+	}
+}
 
-		//cout << filepath.C_Str() << endl;
-		const char* lastSlash = strrchr(filepath.C_Str(), '\\');
+char* ModelLoader::UpdatePath(char* filePath)
+{
+	if (filePath != nullptr)
+	{
+		const char* lastSlash = strrchr(filePath, '\\');
 
 		if (lastSlash) lastSlash++;  //'\\'가 있으면 한칸 이동, 없으면 filepath.C_Str()가 그대로 이름인 경우
 
-		const char* fileName = lastSlash ? lastSlash : filepath.C_Str();
+		const char* fileName = lastSlash ? lastSlash : filePath;
 
 		char* fullTexturePath = new char[256];
 		strcpy_s(fullTexturePath, 256, basePath);
@@ -686,13 +428,207 @@ char* ModelLoader::ReadTextureFilename(aiMaterial* material, UINT type)
 		//printf("%s : \n", fullTexturePath);
 		return fullTexturePath;
 	}
-	else
+	else return nullptr;
+
+
+}
+
+maxNode* ModelLoader::findNode(maxNode* node, const std::string& name)
+{
+	if (node->name == name) return node;
+
+	maxNode* targetNode = nullptr;
+	for (int i = 0; i < node->mNumChildren; i++)
 	{
-		//printf("%d : nullptr\n", static_cast<int>(type));
-		return nullptr;
+		targetNode = findNode(node->mChildren[i], name);
+		if (targetNode) return targetNode;
+	}
+
+	return nullptr;
+}
+
+
+
+void ModelLoader::printNode(maxNode* node, int depth)
+{
+	if (!node)
+		return;
+
+	// 부모-자식 구조 들여쓰기
+	for (int i = 0; i < depth; ++i)
+		std::cout << "  ";
+
+	std::cout << "└─ " << node->name << " (" << node->mNumChildren << " children)" << std::endl;
+
+	// transformation 출력 (4x4)
+	for (int r = 0; r < 4; ++r)
+	{
+		for (int i = 0; i < depth + 1; ++i) // 들여쓰기
+			std::cout << "  ";
+
+		for (int c = 0; c < 4; ++c)
+		{
+			std::cout << node->localTransform.m[r][c] << " ";
+		}
+		std::cout << std::endl;
+	}
+
+	// 자식 노드 재귀 출력
+	for (int i = 0; i < node->mNumChildren; ++i)
+	{
+		printNode(node->mChildren[i], depth + 1);
 	}
 }
 
+
+inline void ModelLoader::ParseVertexLine(const char* startPlace, Vertex* vertex, int meshCnt, int mtlID, int index)
+{
+	float x[11];
+	//position, uv, normal, tangent순
+	if (sscanf_s(startPlace, "%f %f %f %f %f %f %f %f %f %f %f",
+		&x[0], &x[1], &x[2], &x[3], &x[4],
+		&x[5], &x[6], &x[7], &x[8], &x[9], &x[10]) == 11)
+	{
+		if (vertex != nullptr)
+		{
+			vertex->Pos = { x[0], x[1], x[2] };
+			vertex->Tex = { x[3], x[4] };
+			vertex->Normal = { x[5], x[6], x[7] };
+			vertex->tangent = { x[8], x[9], x[10] };
+		}
+		else __debugbreak();
+	}
+
+	int face_cnt = m_materials[mtlID].face_cnt[meshCnt];
+	m_materials[mtlID].index[meshCnt][face_cnt * 3 + index % 3] = index;
+}
+
+
+inline void ModelLoader::ParseBoneWeights(char* line, Vertex* vertex)
+{
+	int weightNum = 0;
+	char* startPlace = nullptr;
+	if (sscanf_s(line, "%d", &weightNum) == 1)
+	{
+		float weight = 0.0f;
+		int boneID = 255;
+		if (weightNum != 0) startPlace = findNthNumberStart(line, 2); // 첫 float 앞
+		for (int i = 0; i < weightNum; i++)
+		{
+			if (sscanf_s(startPlace, "%f %d", &weight, &boneID) == 2)
+			{
+				if (vertex != nullptr)
+				{
+					vertex->m_Weights[i] = weight;
+					vertex->m_BoneIDs[i] = static_cast<uint8_t>(boneID);
+				}
+				else __debugbreak();
+			}
+
+			startPlace = findNthNumberStart(startPlace, 3); // 다음 float,int 쌍
+		}
+	}
+}
+
+void ModelLoader::InsertMtlValue(int allocatedMaterialNum, std::string& mapName, std::string& mapPath)
+{
+	char* albedoTexFilename = nullptr;
+	char* aoTexFilename = nullptr;
+	char* normalTexFilename = nullptr;
+	char* metallicTexFilename = nullptr;
+	char* roughnessTexFilename = nullptr;
+	if (mapName == "base_color_texture")
+	{
+		m_materials[allocatedMaterialNum].albedoTexFilename = new char[mapPath.length() + 1];
+		strcpy_s(m_materials[allocatedMaterialNum].albedoTexFilename, mapPath.length() + 1, mapPath.c_str());
+	}
+	else if (mapName == "ao_texture")
+	{
+		m_materials[allocatedMaterialNum].aoTexFilename = new char[mapPath.length() + 1];
+		strcpy_s(m_materials[allocatedMaterialNum].aoTexFilename, mapPath.length() + 1, mapPath.c_str());
+	}
+	else if (mapName == "normalmap_texture")
+	{
+		m_materials[allocatedMaterialNum].normalTexFilename = new char[mapPath.length() + 1];
+		strcpy_s(m_materials[allocatedMaterialNum].normalTexFilename, mapPath.length() + 1, mapPath.c_str());
+	}
+	else if (mapName == "metallic_texture")
+	{
+		m_materials[allocatedMaterialNum].metallicTexFilename = new char[mapPath.length() + 1];
+		strcpy_s(m_materials[allocatedMaterialNum].metallicTexFilename, mapPath.length() + 1, mapPath.c_str());
+	}
+	else if (mapName == "roughness_texture")
+	{
+		m_materials[allocatedMaterialNum].roughnessTexFilename = new char[mapPath.length() + 1];
+		strcpy_s(m_materials[allocatedMaterialNum].roughnessTexFilename, mapPath.length() + 1, mapPath.c_str());
+	}
+}
+
+void ModelLoader::PrintAllMaterialTextures(material* m_materials, UINT m_materialNum)
+{
+	for (UINT i = 0; i < m_materialNum; ++i)
+	{
+		std::cout << "===== Material " << i << " =====" << std::endl;
+
+		if (m_materials[i].albedoTexFilename)
+			std::cout << "Albedo:    " << m_materials[i].albedoTexFilename << std::endl;
+		else
+			std::cout << "Albedo:    (null)" << std::endl;
+
+		if (m_materials[i].aoTexFilename)
+			std::cout << "AO:        " << m_materials[i].aoTexFilename << std::endl;
+		else
+			std::cout << "AO:        (null)" << std::endl;
+
+		if (m_materials[i].normalTexFilename)
+			std::cout << "Normal:    " << m_materials[i].normalTexFilename << std::endl;
+		else
+			std::cout << "Normal:    (null)" << std::endl;
+
+		if (m_materials[i].metallicTexFilename)
+			std::cout << "Metallic:  " << m_materials[i].metallicTexFilename << std::endl;
+		else
+			std::cout << "Metallic:  (null)" << std::endl;
+
+		if (m_materials[i].roughnessTexFilename)
+			std::cout << "Roughness: " << m_materials[i].roughnessTexFilename << std::endl;
+		else
+			std::cout << "Roughness: (null)" << std::endl;
+
+		std::cout << std::endl;
+	}
+}
+
+void ModelLoader::ReadMapInfo(FILE* pStream, int allocatedMaterialNum)
+{
+	char line[512];
+	char* startPlace = nullptr;
+
+	std::string mapName;
+	std::string mapPath;
+
+	// MAP_NAME 읽기
+	fgets_trim(line, sizeof(line), pStream);
+	startPlace = strstr(line, "*MAP_NAME");
+	if (startPlace)
+		FindStr(startPlace, mapName);
+
+	// normalmap_texture의 경우 MAP_CLASS 두 줄을 추가로 스킵
+	if (mapName == "normalmap_texture")
+	{
+		fgets_trim(line, sizeof(line), pStream);
+		fgets_trim(line, sizeof(line), pStream);
+	}
+
+	// BITMAP 읽기
+	fgets_trim(line, sizeof(line), pStream);
+	startPlace = strstr(line, "*BITMAP");
+	if (startPlace)
+		FindStr(startPlace, mapPath);
+
+	// 재질에 삽입
+	InsertMtlValue(allocatedMaterialNum, mapName, mapPath);
+}
 
 ModelLoader::~ModelLoader()
 {

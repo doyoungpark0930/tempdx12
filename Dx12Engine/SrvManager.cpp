@@ -267,8 +267,10 @@ SrvManager::~SrvManager()
 		m_textureUploadHeap->Release();
 		m_textureUploadHeap = nullptr;
 	}
+	
 	if (m_textures)
 	{
+		//이 부분 모델에서 처리하기
 		for (int i = 0; i < allocatedNum; i++)
 		{
 			if (m_textures[i])
@@ -280,6 +282,7 @@ SrvManager::~SrvManager()
 		delete[] m_textures;
 		m_textures = nullptr;
 	}
+	
 	if (m_srvContainer)
 	{
 		delete[] m_srvContainer;

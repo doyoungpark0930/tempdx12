@@ -494,7 +494,7 @@ void Renderer::CreateModels()
 {
 	char basePath[512]; 
 	WideCharToMultiByte(CP_UTF8, 0, DXUtil::m_assetsResourcesPath, -1, basePath, sizeof(basePath), NULL, NULL); // wchar → MultiByte 변환 (UTF-8 기준)
-	strcat_s(basePath, sizeof(basePath), "Mixamo\\");
+	strcat_s(basePath, sizeof(basePath), "Assasin\\");
 
 	const char* fileName = "assasin.dy";
 

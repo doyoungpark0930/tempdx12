@@ -17,7 +17,8 @@ class ModelLoader {
 public:
 	~ModelLoader();
 	void testLoad(char* basePath, const char* filename);
-	char* ReadTextureFilename(aiMaterial* material, UINT type);
+	void UpdateResourcePath(material* m_materials, UINT m_materialNum);
+	char* UpdatePath(char* filePath);
 	auto& GetBoneInfoMap() { return m_BoneInfoMap; }
 	int& GetBoneCount() { return m_BoneCounter; }
 
@@ -45,6 +46,10 @@ private:
 	void ReadMapInfo(FILE* pStream, int allocatedMaterialNum);
 	inline void ParseVertexLine(const char* startPlace, Vertex* vertex, int meshCnt, int mtlID, int index);
 	inline void ParseBoneWeights(char* line, Vertex* vertex);
+	void PrintAllMaterialTextures(material* m_materials, UINT m_materialNum);
+	void printNode(maxNode* node, int depth = 0);
+	maxNode* findNode(maxNode* node, const std::string& name);
+
 	void SetVertexBoneDataToDefault(Vertex& vertex)
 	{
 		for (int i = 0; i < MAX_BONE_INFLUENCE; i++)

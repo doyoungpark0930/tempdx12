@@ -1,6 +1,6 @@
 Texture2D albedoTex : register(t0);
-Texture2D normalTex : register(t1);
-Texture2D aoTex : register(t2);
+Texture2D aoTex : register(t1);
+Texture2D normalTex : register(t2);
 Texture2D metallicTex : register(t3);
 Texture2D roughnessTex : register(t4);
 
