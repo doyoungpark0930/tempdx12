@@ -1,17 +1,26 @@
-﻿  Renderer.cpp
-C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\DXHelper.h(44,24): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-  (compiling source file '/Renderer.cpp')
-  
-C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\DXHelper.h(75,31): warning C4244: '=': conversion from '__int64' to 'int', possible loss of data
-  (compiling source file '/Renderer.cpp')
-  
+﻿  Model.cpp
 C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\Animation.h(26,47): warning C4244: 'return': conversion from 'int' to 'float', possible loss of data
-  (compiling source file '/Renderer.cpp')
+  (compiling source file '/Model.cpp')
   
-C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\Renderer.cpp(168,77): warning C4390: ';': empty controlled statement found; is this the intent?
-  (compiling source file '/Renderer.cpp')
+C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\Model.cpp(130,20): warning C4018: '<': signed/unsigned mismatch
+  (compiling source file '/Model.cpp')
   
-C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\Renderer.cpp(538,36): warning C4305: '=': truncation from 'double' to 'float'
-  (compiling source file '/Renderer.cpp')
+C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\Model.cpp(146,21): warning C4018: '<': signed/unsigned mismatch
+  (compiling source file '/Model.cpp')
+  
+C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\Model.cpp(157,20): warning C4018: '<': signed/unsigned mismatch
+  (compiling source file '/Model.cpp')
+  
+C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\Model.cpp(165,20): warning C4018: '<': signed/unsigned mismatch
+  (compiling source file '/Model.cpp')
+  
+C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\Model.cpp(249,20): warning C4018: '<': signed/unsigned mismatch
+  (compiling source file '/Model.cpp')
+  
+C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\Model.cpp(281,21): warning C4018: '<': signed/unsigned mismatch
+  (compiling source file '/Model.cpp')
+  
+C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\Model.cpp(345,20): warning C4018: '<': signed/unsigned mismatch
+  (compiling source file '/Model.cpp')
   
   Dx12Engine.vcxproj -> C:\Users\Lenovo\source\repos\BackUpDx12\x64\Debug\Dx12Engine.exe

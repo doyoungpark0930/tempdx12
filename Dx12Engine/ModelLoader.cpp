@@ -98,6 +98,7 @@ void ModelLoader::testLoad(char* basePath, const char* filename)
 					m_meshes = new mesh[m_meshesNum];
 					for (int i = 0; i < m_materialNum; i++)
 					{
+						m_materials[i].meshNum = m_meshesNum;
 						m_materials[i].index = new UINT * [m_meshesNum];
 						m_materials[i].face_cnt = new UINT[m_meshesNum];
 						memset(m_materials[i].face_cnt, 0, sizeof(UINT) * m_meshesNum);
@@ -425,7 +426,7 @@ char* ModelLoader::UpdatePath(char* filePath)
 		strcpy_s(fullTexturePath, 256, basePath);
 		strcat_s(fullTexturePath, 256, fileName);
 
-		//printf("%s : \n", fullTexturePath);
+		SafeDeleteArray(&filePath);
 		return fullTexturePath;
 	}
 	else return nullptr;

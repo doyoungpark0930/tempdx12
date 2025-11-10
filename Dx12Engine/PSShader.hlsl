@@ -65,7 +65,7 @@ float4 PSMain(PS_INPUT input) : SV_TARGET
     float3 diffuse = diff * float3(1.0f, 1.0f, 1.0f);
      
     // Specular
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0f), 1.0f); // shininess
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0f), 5.0f); // shininess
     float3 specular = spec * float3(1.0f, 1.0f, 1.0f);
 
     float3 lighting = ambient + diffuse + specular;

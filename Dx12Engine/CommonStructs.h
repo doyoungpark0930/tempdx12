@@ -1,5 +1,5 @@
 #pragma once
-
+#include "DXHelper.h"
 using namespace DirectX;
 using namespace DirectX::SimpleMath;
 
@@ -100,39 +100,24 @@ struct material
 	char* metallicTexFilename = nullptr;
 	char* roughnessTexFilename = nullptr;
 
+	UINT meshNum = 0;
 	UINT** index = nullptr; //첫번째 괄호는 mesh순서에 해당
-
 	UINT* face_cnt = nullptr; //mesh당 face가 몇개 그려졌는지
 	
-	//필요할 때 model에서 미리미리 제거하자
 	~material()
 	{
+		SafeDeleteArray(&albedoTexFilename);
+		SafeDeleteArray(&aoTexFilename);
+		SafeDeleteArray(&normalTexFilename);
+		SafeDeleteArray(&metallicTexFilename);
+		SafeDeleteArray(&roughnessTexFilename);
 
-		if (face_cnt)
+		SafeDeleteArray(&face_cnt);
+		for (int i = 0; i < meshNum; i++)
 		{
-			delete[] face_cnt;
+			SafeDeleteArray(&index[i]);
 		}
-		if (albedoTexFilename)
-		{
-			delete[] albedoTexFilename;
-		}
-		if (aoTexFilename)
-		{
-			delete[] aoTexFilename;
-		}
-		if (normalTexFilename)
-		{
-			delete[] normalTexFilename;
-		}
-		if (metallicTexFilename)
-		{
-			delete[] metallicTexFilename;
-		}
-		if (roughnessTexFilename)
-		{
-			delete[] roughnessTexFilename;
-		}
-		
+		SafeDeleteArray(&index);
 	}
 };
 
@@ -140,6 +125,11 @@ struct mesh //일단 이렇게 확실히 mesh로 나누어야함. 이렇게 안하면 각 mesh의 inde
 {
 	Vertex* vertices = nullptr;
 	UINT verticesNum = 0; 
+
+	~mesh()
+	{
+		SafeDeleteArray(&vertices);
+	}
 };
 
 class Animation;

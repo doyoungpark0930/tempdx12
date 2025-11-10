@@ -36,7 +36,6 @@ void Model::UpdateMembers()
 	m_fenceValue = m_renderer->GetFenceValue();
 }
 
-
 D3D12_VERTEX_BUFFER_VIEW Model::CreateVertexBuffer(Vertex* vertices, UINT vertexCount)
 {
 	const UINT vertexBufferSize = sizeof(Vertex) * vertexCount;
@@ -179,33 +178,9 @@ void Model::CreateModel(MeshDataInfo meshesInfo)
 	}
 
 
-	for (int i = 0; i < m_meshNum; i++)
-	{
-		SafeDeleteArray(&meshesInfo.meshes[i].vertices);
-	}
+	SafeDeleteArray(&meshesInfo.meshes);
+	SafeDeleteArray(&meshesInfo.Materials);
 
-	for (int i = 0; i < m_materialNum; i++)
-	{
-		SafeDeleteArray(&meshesInfo.Materials[i].albedoTexFilename);
-		SafeDeleteArray(&meshesInfo.Materials[i].aoTexFilename);
-		SafeDeleteArray(&meshesInfo.Materials[i].normalTexFilename);
-		SafeDeleteArray(&meshesInfo.Materials[i].metallicTexFilename);
-		SafeDeleteArray(&meshesInfo.Materials[i].roughnessTexFilename);
-
-
-		//SafeDeleteArray(meshesInfo.Materials[i].index); 여기인덱스는 잘해제안될듯
-	}
-
-}
-void Model::CreateTextureFromName(char* textureFilename, SRV_CONTAINER& srvContainer)
-{
-	if (textureFilename)
-	{
-		wchar_t PathName[256];
-		MultiByteToWideChar(CP_UTF8, 0, textureFilename, -1, PathName, 256);
-
-		srvContainer = m_srvManager->CreateTexture(PathName);
-	}
 }
 
 void Model::Draw(const Matrix* pMatrix)
@@ -319,6 +294,17 @@ void Model::Draw(const Matrix* pMatrix)
 
 }
 
+void Model::CreateTextureFromName(char* textureFilename, SRV_CONTAINER& srvContainer)
+{
+	if (textureFilename)
+	{
+		wchar_t PathName[256];
+		MultiByteToWideChar(CP_UTF8, 0, textureFilename, -1, PathName, 256);
+
+		srvContainer = m_srvManager->CreateTexture(PathName);
+	}
+}
+
 void Model::WaitForPreviousFrame()
 {
 	// Signal and increment the fence value.
@@ -351,14 +337,25 @@ Model::~Model()
 {
 	//WaitForPreviousFrame(); //gpu올라오기 전에 종료해버린다면 의미가 잇을수도
 
-	//참고 : 나중에 이 Model을 안 쓸거면 srvContainer의 Resource를 VRAM에서 내려도 되는데,
-	//그렇다면 srvManager소멸자에서 해제가아니라, 여기 소멸자에서 resource해제해야함
-	//for (int i = 0; i < meshNum; i++)
-	//{
-		//SafeDeleteArray(&m_Meshes[i].srvContainer);
-	//}
 	deleteNode(rootNode);
-	//SafeDeleteArray(&m_Meshes);
+	SafeDeleteArray(&materialContainer);
 	SafeDeleteArray(&m_animations);
+	SafeDeleteArray(&m_vertexBufferView);
 
+	for (int i = 0; i < m_materialNum; i++)
+	{
+		SafeDeleteArray(&m_TriGroupList[i].IndexBufferView);
+		SafeDeleteArray(&m_TriGroupList[i].triNum);
+		for (int j = 0; j < MAX_TEXTURE_NUM; j++)
+		{
+			ID3D12Resource* pSrvResource = m_TriGroupList[i].srvContainer[j].pSrvResource;
+			if (pSrvResource)
+			{
+				pSrvResource->Release();
+				pSrvResource = nullptr;
+			}
+		}
+		SafeDeleteArray(&m_TriGroupList[i].srvContainer);
+	}
+	SafeDeleteArray(&m_TriGroupList);
 }

@@ -32,7 +32,7 @@ void SrvManager::OnInit(ID3D12Device* pDevice, Renderer* pRenderer)
 	if (FAILED(m_device->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&m_descritorHeap)))) __debugbreak();
 
 	m_srvContainer = new SRV_CONTAINER[max_descriptorNum];
-	m_textures = new ID3D12Resource * [max_descriptorNum]; //텍스춰를 pool이아닌 중구난방으로 할당하고있긴함
+	m_textures = new ID3D12Resource * [max_descriptorNum]; //텍스춰를 pool이아닌 중구난방으로 할당하고있긴함=> 메모리 단편화 위험
 
 }
 SRV_CONTAINER SrvManager::CreateTiledTexture()
@@ -271,15 +271,7 @@ SrvManager::~SrvManager()
 	
 	if (m_textures)
 	{
-		//이 부분 모델에서 처리하기
-		for (int i = 0; i < allocatedNum; i++)
-		{
-			if (m_textures[i])
-			{
-				m_textures[i]->Release();
-				m_textures[i] = nullptr;
-			}
-		}
+		//m_textures의 Resource는 Model의 소멸자에서 해제
 		delete[] m_textures;
 		m_textures = nullptr;
 	}
