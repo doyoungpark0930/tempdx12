@@ -9,7 +9,6 @@ cbuffer MODEL_CONSTANT : register(b1)
 {
     matrix Model;
     matrix NormalModel;
-    bool useNormalMap;
 };
 
 cbuffer SkinnedConstants : register(b2)

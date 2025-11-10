@@ -116,7 +116,8 @@ HRESULT SetDataToUploadBuffer(
 	if (SUCCEEDED(hr))
 	{
 		byteOffset = UINT(*m_pDataCur - m_pDataBegin);
-		if(pData) memcpy(*m_pDataCur, pData, byteSize);
+		if (pData) memcpy(*m_pDataCur, pData, byteSize);
+		else memset(*m_pDataCur, 0, byteSize);
 		*m_pDataCur += byteSize;
 	}
 

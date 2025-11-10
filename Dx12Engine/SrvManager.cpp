@@ -147,6 +147,7 @@ SRV_CONTAINER SrvManager::CreateTexture(const wchar_t* szFileName)
 	else
 	{
 		useDDS = false;
+
 		if (FAILED(LoadWICTextureFromFile(m_device, szFileName, &m_textures[allocatedNum], Datas, wicSubresource)))
 		{
 			printf("Failed to load WIC texture file by SrvManager::CreateTexture\n");

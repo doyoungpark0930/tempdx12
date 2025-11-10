@@ -20,6 +20,21 @@ void CbvManager::OnInit(ID3D12Device* pDevice, Renderer* pRenderer)
 	cbvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 	if (FAILED(m_device->CreateDescriptorHeap(&cbvHeapDesc, IID_PPV_ARGS(&m_descritorHeap)))) __debugbreak();
 
+	//MaterialCBV Init
+	{
+		m_materialContainer = new CBV_CONTAINER[max_materialNum];
+
+		D3D12_DESCRIPTOR_HEAP_DESC materialHeapDesc = {};
+		materialHeapDesc.NumDescriptors = max_materialNum;
+		materialHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+		materialHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+		if (FAILED(m_device->CreateDescriptorHeap(&materialHeapDesc, IID_PPV_ARGS(&m_materialDescritorHeap)))) __debugbreak();
+
+		materialHandle = m_materialDescritorHeap->GetCPUDescriptorHandleForHeapStart();
+
+		CreateMaterialBufferPool();
+	}
+
 	//Animation Init
 	{
 		m_animationContainer = new CBV_CONTAINER[max_animationNum];
@@ -31,6 +46,8 @@ void CbvManager::OnInit(ID3D12Device* pDevice, Renderer* pRenderer)
 		if (FAILED(m_device->CreateDescriptorHeap(&aniHeapDesc, IID_PPV_ARGS(&m_animationDescritorHeap)))) __debugbreak();
 
 		animationHandle = m_animationDescritorHeap->GetCPUDescriptorHandleForHeapStart();
+
+		CreateAnimationBufferPool();
 	}
 
 	UINT constantMemory = Align(sizeof(GLOBAL_CONSTANT), 256) + Align(sizeof(MODEL_CONSTANT), 256) * max_descriptorNum;
@@ -103,7 +120,7 @@ void CbvManager::OnInit(ID3D12Device* pDevice, Renderer* pRenderer)
 		CbvCnt++;
 	}
 }
-CBV_CONTAINER* CbvManager::GetAllocContainer()
+CBV_CONTAINER* CbvManager::GetAllocatedContainer()
 {
 	return &m_cbvContainer[allocatedCbvNum++];
 }
@@ -112,6 +129,56 @@ CBV_CONTAINER* CbvManager::GetAllocContainer()
 void CbvManager::Reset()
 {
 	allocatedCbvNum = 1; //첫 디스크립터 자리 globalConstant
+}
+
+void CbvManager::CreateMaterialBufferPool()
+{
+	UINT constantMemory = Align(sizeof(MATERIAL_CONSTANT), 256) * max_materialNum;
+
+	CD3DX12_HEAP_PROPERTIES uploadHeapProps(D3D12_HEAP_TYPE_UPLOAD);
+	CD3DX12_RESOURCE_DESC resDesc = CD3DX12_RESOURCE_DESC::Buffer(constantMemory);
+
+	if (FAILED(m_device->CreateCommittedResource(
+		&uploadHeapProps,
+		D3D12_HEAP_FLAG_NONE,
+		&resDesc,
+		D3D12_RESOURCE_STATE_GENERIC_READ,
+		nullptr,
+		IID_PPV_ARGS(&m_materialConstantUploadBufferPool)))) __debugbreak();
+
+	void* pData;
+	CD3DX12_RANGE readRange(0, 0);
+	m_materialConstantUploadBufferPool->Map(0, &readRange, &pData);
+	m_materialConstantCur = m_materialConstantBegin = reinterpret_cast<UINT8*>(pData);
+	m_materialConstantEnd = m_materialConstantBegin + constantMemory;
+}
+
+CBV_CONTAINER CbvManager::AllocMaterialCBV()
+{
+	UINT constantOffset = 0;
+	if (FAILED(
+		SetDataToUploadBuffer(
+			&m_materialConstantCur,
+			m_materialConstantBegin,
+			m_materialConstantEnd,
+			nullptr, sizeof(MATERIAL_CONSTANT), 1,
+			256,
+			constantOffset
+		)))__debugbreak();
+
+	D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc = {};
+	cbvDesc.BufferLocation = m_materialConstantUploadBufferPool->GetGPUVirtualAddress() + constantOffset;
+	cbvDesc.SizeInBytes = Align(sizeof(MATERIAL_CONSTANT), 256);
+
+	m_device->CreateConstantBufferView(&cbvDesc, materialHandle);
+
+	m_materialContainer[m_materialContainerCnt].pSystemMemAddr = m_materialConstantBegin + constantOffset;
+	m_materialContainer[m_materialContainerCnt].CBVHandle = materialHandle;
+
+	materialHandle.Offset(1, descriptorSize);
+
+	return m_materialContainer[m_materialContainerCnt++];
+
 }
 
 
@@ -179,6 +246,19 @@ CbvManager::~CbvManager()
 		m_descritorHeap->Release();
 		m_descritorHeap = nullptr;
 	}
+
+	if (m_materialConstantUploadBufferPool)
+	{
+		m_materialConstantUploadBufferPool->Release();
+		m_materialConstantUploadBufferPool = nullptr;
+	}
+
+	if (m_materialDescritorHeap)
+	{
+		m_materialDescritorHeap->Release();
+		m_materialDescritorHeap = nullptr;
+	}
+
 	if (m_animationConstantUploadBufferPool)
 	{
 		m_animationConstantUploadBufferPool->Release();
@@ -191,4 +271,5 @@ CbvManager::~CbvManager()
 	}
 	SafeDeleteArray(&m_cbvContainer);
 	SafeDeleteArray(&m_animationContainer);
+	SafeDeleteArray(&m_materialContainer);
 }

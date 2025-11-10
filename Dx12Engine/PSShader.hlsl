@@ -13,12 +13,10 @@ cbuffer GLOBAL_CONSTANT : register(b0)
     float4 lightPos;
 };
 
-cbuffer MODEL_CONSTANT : register(b1)
+cbuffer MATERIAL_CONSTANT : register(b3)
 {
-    matrix Model;
-    matrix NormalModel;
     int useNormalMap;
-};
+}
 
 struct PS_INPUT
 {
@@ -37,6 +35,7 @@ float3 GetNormal(PS_INPUT input)
     {
         float3 normal = normalTex.Sample(g_sampler, input.uv).rgb;
         normal = 2.0 * normal - 1.0; // 범위 조절 [-1.0, 1.0]
+        
         
         float3 N = normalWorld;
         float3 T = normalize(input.tangent - dot(input.tangent, N) * N);
@@ -70,8 +69,7 @@ float4 PSMain(PS_INPUT input) : SV_TARGET
     float3 specular = spec * float3(1.0f, 1.0f, 1.0f);
 
     float3 lighting = ambient + diffuse + specular;
-    //float4 color = albedoTex.Sample(g_sampler, input.uv);
-    float4 color = float4(1.0, 1.0, 1.0, 1.0);
+    float4 color = albedoTex.Sample(g_sampler, input.uv);
     
     return float4(color.rgb * lighting, color.a);
 }

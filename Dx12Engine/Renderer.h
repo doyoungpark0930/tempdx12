@@ -105,7 +105,7 @@ private:
 	Vector3 eyePos = Vector3(0.0f, 0.0f, -5.0f);
 	Vector3 lookAt = Vector3(0.0f, 0.0f, 0.0f);
 	Vector3 up = Vector3(0.0f, 1.0f, 0.0f);
-	Vector3 lightPos = Vector3(0.0f, 1.0f, -0.25f);
+	Vector3 lightPos = Vector3(1.0f, 0.5f, -0.5f);
 
 
 	void LoadAssets();

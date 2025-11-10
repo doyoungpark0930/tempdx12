@@ -5,6 +5,7 @@ using namespace DirectX::SimpleMath;
 
 #define MAX_BONE_INFLUENCE 4
 #define MAX_TEXTURE_NUM 5
+#define NORMALMAP_SLOT 2
 
 struct Vertex
 {
@@ -42,7 +43,11 @@ struct MODEL_CONSTANT
 {
 	Matrix Model;
 	Matrix NormalModel;
-	UINT useNormalMap;
+};
+
+struct MATERIAL_CONSTANT
+{
+	int useNormalMap = 0;
 };
 
 struct SkinnedConstants
@@ -83,7 +88,6 @@ struct TRI_GROUP_PER_MTL
 {
 	D3D12_INDEX_BUFFER_VIEW* IndexBufferView = nullptr;
 	UINT* triNum = nullptr;
-	UINT usedMeshNum = 0;
 
 	SRV_CONTAINER* srvContainer = nullptr;
 };

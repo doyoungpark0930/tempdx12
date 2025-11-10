@@ -122,7 +122,7 @@ D3D12_INDEX_BUFFER_VIEW Model::CreateIndexBuffer(UINT* indices, UINT indiceCount
 
 	return indexBufferView;
 }
-void Model::CreateModel(MeshDataInfo meshesInfo, bool useNormalMap)
+void Model::CreateModel(MeshDataInfo meshesInfo)
 {
 	rootNode = meshesInfo.rootNode;
 	m_materialNum = meshesInfo.materialNum;
@@ -142,20 +142,16 @@ void Model::CreateModel(MeshDataInfo meshesInfo, bool useNormalMap)
 		if (meshesInfo.Materials[i].roughnessTexFilename)
 			CreateTextureFromName(meshesInfo.Materials[i].roughnessTexFilename, m_TriGroupList[i].srvContainer[4]);
 
-		int usedMeshNum = 0;
 		m_TriGroupList[i].IndexBufferView = new D3D12_INDEX_BUFFER_VIEW[m_meshNum];
 		m_TriGroupList[i].triNum = new UINT[m_meshNum];
 		for (int j = 0; j < m_meshNum; j++)
 		{
+			m_TriGroupList[i].triNum[j] = meshesInfo.Materials[i].face_cnt[j]; //이걸로 그릴지안그릴지 판단
 			if (meshesInfo.Materials[i].face_cnt[j] > 0)
 			{
-				m_TriGroupList[i].triNum[j] = meshesInfo.Materials[i].face_cnt[j];
 				m_TriGroupList[i].IndexBufferView[j] = CreateIndexBuffer(meshesInfo.Materials[i].index[j], m_TriGroupList[i].triNum[j] * 3);
-				usedMeshNum++;
 			}
-			m_TriGroupList[i].triNum[j] = meshesInfo.Materials[i].face_cnt[j];
 		}
-		m_TriGroupList[i].usedMeshNum = usedMeshNum;
 	}
 
 	m_vertexBufferView = new D3D12_VERTEX_BUFFER_VIEW[m_meshNum];
@@ -164,6 +160,13 @@ void Model::CreateModel(MeshDataInfo meshesInfo, bool useNormalMap)
 		m_vertexBufferView[i] = CreateVertexBuffer(meshesInfo.meshes[i].vertices, meshesInfo.meshes[i].verticesNum);
 	}
 
+
+	//Alloc Material Constant 
+	materialContainer = new CBV_CONTAINER[m_materialNum];
+	for (int i = 0; i < m_materialNum; i++)
+	{
+		materialContainer[i] = m_cbvManager->AllocMaterialCBV();
+	}
 
 
 	if (meshesInfo.m_animations)
@@ -174,7 +177,6 @@ void Model::CreateModel(MeshDataInfo meshesInfo, bool useNormalMap)
 		m_matricesNum = meshesInfo.matricesNum;
 		m_animations = meshesInfo.m_animations; //Model에서 animation데이터 해제하기 위함
 	}
-	m_useNormalMap = useNormalMap;
 
 
 	for (int i = 0; i < m_meshNum; i++)
@@ -219,7 +221,7 @@ void Model::Draw(const Matrix* pMatrix)
 
 
 	//ModelConstant
-	CBV_CONTAINER* cbvContainer = m_cbvManager->GetAllocContainer();
+	CBV_CONTAINER* cbvContainer = m_cbvManager->GetAllocatedContainer();
 	MODEL_CONSTANT* pModelConstant = (MODEL_CONSTANT*)cbvContainer->pSystemMemAddr;
 
 	//Model Update
@@ -230,8 +232,10 @@ void Model::Draw(const Matrix* pMatrix)
 		NormalMatrix.Translation(Vector3(0.0f));
 		NormalMatrix = NormalMatrix.Invert().Transpose();
 		pModelConstant->NormalModel = NormalMatrix.Transpose();
-		pModelConstant->useNormalMap = m_useNormalMap;
 	}
+
+	
+
 
 	//AnimationUpdate
 	if (existAnimation)
@@ -241,11 +245,13 @@ void Model::Draw(const Matrix* pMatrix)
 
 	}
 
+
 	//AllocTable 및 디스크립터 복사
 	CD3DX12_GPU_DESCRIPTOR_HANDLE gpuDescriptorTable = {};
 	CD3DX12_CPU_DESCRIPTOR_HANDLE cpuDescriptorTable = {};
 
-	UINT requiredDescriptorCount = 1 + 1 + m_materialNum * MAX_TEXTURE_NUM; //model행렬(1)+ animationMatrices(1) + srv의 개수
+	//model행렬(1)+ animationMatrices(1) + (mtlCbv+textures)*mtlNum;
+	UINT requiredDescriptorCount = 1 + 1 + m_materialNum * (1 + MAX_TEXTURE_NUM);
 	m_descriptorPool->AllocDescriptorTable(&cpuDescriptorTable, &gpuDescriptorTable, requiredDescriptorCount);
 
 	// modelCBV
@@ -254,30 +260,59 @@ void Model::Draw(const Matrix* pMatrix)
 	if (existAnimation)
 	{
 		m_device->CopyDescriptorsSimple(1, cpuDescriptorTable, boneMatricesContainer->CBVHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-		cpuDescriptorTable.Offset(1, descriptorSize);
-		m_commandList->SetGraphicsRootDescriptorTable(1, gpuDescriptorTable);
-		gpuDescriptorTable.Offset(2, descriptorSize);
-	}
-	else
-	{
-		m_commandList->SetGraphicsRootDescriptorTable(1, gpuDescriptorTable);
-		gpuDescriptorTable.Offset(1, descriptorSize);
 	}
 
-	//m_commandList->IASetVertexBuffers(0, 1, &m_vertexBufferView);
+	cpuDescriptorTable.Offset(1, descriptorSize);
+	m_commandList->SetGraphicsRootDescriptorTable(1, gpuDescriptorTable);
+	gpuDescriptorTable.Offset(2, descriptorSize);
+
 	m_commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-	// modelCBV / mtl[0]{albeo,ao,metallic..} / mtl[1]{albedo, ao, metallic..} /..
-	// modelCBV / m_FinalBoneMatrices / mtl[0]{albeo,ao,metallic..} / mtl[1]{albedo, ao, metallic..} /..
 
+	//global / model / mtl1 (mtl_constant), (textures...) / mtl2 (mtl_constant), (textures...) / mtl3 ..
 
 	for (int i = 0; i < m_materialNum; i++)
 	{
 		TRI_GROUP_PER_MTL* pTriGroup = m_TriGroupList + i;
-		//m_commandList->IASetIndexBuffer(&pTriGroup->IndexBufferView);
-		//m_commandList->DrawIndexedInstanced(pTriGroup->triCount * 3, 1, 0, 0, 0);
-	}
 
+		//MATERIAL_CONSTANT
+		{
+			MATERIAL_CONSTANT* pMaterialConstant = (MATERIAL_CONSTANT*)materialContainer[i].pSystemMemAddr;
+			if (pTriGroup->srvContainer[NORMALMAP_SLOT].pSrvResource != nullptr)  pMaterialConstant->useNormalMap = true; 
+			else  pMaterialConstant->useNormalMap = false; 
+			m_device->CopyDescriptorsSimple(1, cpuDescriptorTable, materialContainer[i].CBVHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+			cpuDescriptorTable.Offset(1, descriptorSize);
+			m_commandList->SetGraphicsRootDescriptorTable(2, gpuDescriptorTable);
+			gpuDescriptorTable.Offset(1, descriptorSize);
+		}
+
+		//TEXTURES
+		for (int j = 0; j < MAX_TEXTURE_NUM; j++)
+		{
+			if (pTriGroup->srvContainer[j].pSrvResource != nullptr)
+			{
+				m_device->CopyDescriptorsSimple(1, cpuDescriptorTable, pTriGroup->srvContainer[j].srvHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+				cpuDescriptorTable.Offset(1, descriptorSize);
+			}
+			else
+			{
+				cpuDescriptorTable.Offset(1, descriptorSize); //resource없으면 Descriptor를 빈공간으로
+			}
+		}
+		m_commandList->SetGraphicsRootDescriptorTable(3, gpuDescriptorTable);
+		gpuDescriptorTable.Offset(MAX_TEXTURE_NUM, descriptorSize);
+
+		//Mesh Draw
+		for (int j = 0; j < m_meshNum; j++)
+		{
+			if (pTriGroup->triNum[j] > 0)
+			{
+				m_commandList->IASetVertexBuffers(0, 1, &m_vertexBufferView[j]);
+				m_commandList->IASetIndexBuffer(&pTriGroup->IndexBufferView[j]);
+				m_commandList->DrawIndexedInstanced(pTriGroup->triNum[j] * 3, 1, 0, 0, 0);
+			}
+		}
+	}
 
 
 

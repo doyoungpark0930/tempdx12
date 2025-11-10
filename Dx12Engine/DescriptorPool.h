@@ -15,7 +15,7 @@ public:
 
 private :
 	ID3D12Device* m_device = nullptr;
-	const UINT descriptorNumPerObject = 24;
+	const UINT descriptorNumPerObject = 36;
 
 	D3D12_CPU_DESCRIPTOR_HANDLE	m_cpuDescriptorHandle = {};
 	D3D12_GPU_DESCRIPTOR_HANDLE	m_gpuDescriptorHandle = {};

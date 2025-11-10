@@ -14,7 +14,7 @@ public:
 	static DescriptorPool* m_descriptorPool;
 	static SrvManager* m_srvManager;
 	static CbvManager* m_cbvManager;
-	void CreateModel(MeshDataInfo meshesInfo, bool useNormalMap);
+	void CreateModel(MeshDataInfo meshesInfo);
 	void CreateTextureFromName(char* textureFilename, SRV_CONTAINER& srvContainer);
 	D3D12_VERTEX_BUFFER_VIEW CreateVertexBuffer(Vertex* vertices, UINT vertexCount);
 	D3D12_INDEX_BUFFER_VIEW CreateIndexBuffer(UINT* indices, UINT indiceCount);
@@ -32,12 +32,16 @@ private:
 	ID3D12Fence* m_fence = nullptr;
 	UINT64* m_fenceValue = nullptr;
 
+	UINT descriptorSize;
+
+	//TriGroup
 	D3D12_VERTEX_BUFFER_VIEW* m_vertexBufferView = nullptr;
 	TRI_GROUP_PER_MTL* m_TriGroupList = nullptr;
 	UINT m_materialNum = 0;
 	UINT m_meshNum = 0;
 
-	UINT descriptorSize;
+	//MaterialConstant
+	CBV_CONTAINER* materialContainer = nullptr;
 
 	//animation
 	bool existAnimation = false;

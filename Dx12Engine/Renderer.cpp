@@ -259,22 +259,26 @@ void Renderer::CreateRootSignature()
 		featureData.HighestVersion = D3D_ROOT_SIGNATURE_VERSION_1_0;
 	}
 
-	CD3DX12_DESCRIPTOR_RANGE1 ranges[3];
-	CD3DX12_ROOT_PARAMETER1 rootParameters[3];
+	CD3DX12_DESCRIPTOR_RANGE1 ranges[4];
+	CD3DX12_ROOT_PARAMETER1 rootParameters[4];
 
 	// b0: GLOBAL_CONSTANT (1개 고정)
 	ranges[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 0, 0);
 	rootParameters[0].InitAsDescriptorTable(1, &ranges[0], D3D12_SHADER_VISIBILITY_ALL);
 
-	// b1 : ModelConstantBuffer (오브젝트 개수만큼)
+	// b1 : Model_Constant (오브젝트 개수만큼)
 	// b2 : m_FinalBoneMatrices
 	ranges[1].Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 2, 1, 0);
-	rootParameters[1].InitAsDescriptorTable(1, &ranges[1], D3D12_SHADER_VISIBILITY_ALL);
+	rootParameters[1].InitAsDescriptorTable(1, &ranges[1], D3D12_SHADER_VISIBILITY_VERTEX);
 
-	// t0 : srv
-	UINT maxSrvNum = 8;
-	ranges[2].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, maxSrvNum, 0, 0);
+	// b3 : Material_Constant
+	ranges[2].Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 3, 0);
 	rootParameters[2].InitAsDescriptorTable(1, &ranges[2], D3D12_SHADER_VISIBILITY_PIXEL);
+
+	// t0~t7 : srv
+	UINT maxSrvNum = 8;
+	ranges[3].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, maxSrvNum, 0, 0);
+	rootParameters[3].InitAsDescriptorTable(1, &ranges[3], D3D12_SHADER_VISIBILITY_PIXEL);
 	
 	
 
@@ -494,34 +498,19 @@ void Renderer::CreateModels()
 {
 	char basePath[512]; 
 	WideCharToMultiByte(CP_UTF8, 0, DXUtil::m_assetsResourcesPath, -1, basePath, sizeof(basePath), NULL, NULL); // wchar → MultiByte 변환 (UTF-8 기준)
-	strcat_s(basePath, sizeof(basePath), "Assasin\\");
+	strcat_s(basePath, sizeof(basePath), "Sci_fi_girl\\");
 
-	const char* fileName = "assasin.dy";
+	const char* fileName = "sci_fi_girl.dy";
 
 	MeshDataInfo meshesInfo = GeometryGenerator::testReadFromFile(basePath, fileName);
 
-	/*
-	m_animator = new Animator; 
-	const char* animationNames[] = {"standing walk back 3ds.fbx","Standing Walk Back without skin.fbx"};
-	MeshDataInfo meshesInfo = GeometryGenerator::AnimationReadFromFile(basePath, fileName, animationNames, _countof(animationNames));
-	m_animator->OnInit(&meshesInfo.m_animations[1], meshesInfo.m_defaultTransform);
-	meshesInfo.finalBoneMatrices = m_animator->GetFinalBoneMatrices();
-	meshesInfo.matricesNum = m_animator->matricesNum;
-	m_cbvManager->CreateAnimationBufferPool();
-
-	GeometryGenerator::ReadFromFile(basePath, fileName);
-
-
-
-	m_Models[0].CreateModel(meshesInfo, true);
-	*/
-	m_Models[0].CreateModel(meshesInfo, true);
+	m_Models[0].CreateModel(meshesInfo);
 	m_ObjectState = new ObjectState[maxObjectsNum];
 }
 void Renderer::OnInitGlobalConstant()
 {
 
-	GLOBAL_CONSTANT* globalConstant = (GLOBAL_CONSTANT*)(m_cbvManager->m_constantBegin + 0);
+	GLOBAL_CONSTANT* globalConstant = (GLOBAL_CONSTANT*)(m_cbvManager->GetStartCBV() + 0);
 	View = XMMatrixLookAtLH(eyePos, lookAt, up);
 	Proj = XMMatrixPerspectiveFovLH(fovY, aspect, nearZ, farZ);
 	globalConstant->ViewProj = (View * Proj).Transpose();
@@ -534,7 +523,7 @@ void Renderer::OnInitGlobalConstant()
 void Renderer::Update(float dt)
 {
 	//globalConstant Update
-	GLOBAL_CONSTANT* globalConstant = (GLOBAL_CONSTANT*)(m_cbvManager->m_constantBegin + 0);
+	GLOBAL_CONSTANT* globalConstant = (GLOBAL_CONSTANT*)(m_cbvManager->GetStartCBV() + 0);
 	View = XMMatrixLookAtLH(eyePos, lookAt, up);
 	globalConstant->ViewProj = (View * Proj).Transpose();
 	globalConstant->eyePos = Vector4(eyePos.x, eyePos.y, eyePos.z, 1.0f);
@@ -542,24 +531,24 @@ void Renderer::Update(float dt)
 
 	//m_animator->UpdateAnimation(dt);
 
-	m_ObjectState[0].scale.x = 1.5f;
-	m_ObjectState[0].scale.y = 1.5f;
-	m_ObjectState[0].scale.z = 1.5f;
-	m_ObjectState[0].rotation.x = -pi / 2.0f;
+	m_ObjectState[0].scale.x = 3.0f;
+	m_ObjectState[0].scale.y = 3.0f;
+	m_ObjectState[0].scale.z = 3.0f;
+	//m_ObjectState[0].rotation.x = -pi/2.0f;
 	m_ObjectState[0].rotation.y = -pi / 12.0f;
 	m_ObjectState[0].pos.x = -2.0f;
-
-	m_ObjectState[1].scale.x = 1.5f;
-	m_ObjectState[1].scale.y = 1.5f;
-	m_ObjectState[1].scale.z = 1.5f;
-	m_ObjectState[1].rotation.x = -pi / 2.0f;
+	
+	m_ObjectState[1].scale.x = 2.0f;
+	m_ObjectState[1].scale.y = 2.0f;
+	m_ObjectState[1].scale.z = 2.0f;
+	//m_ObjectState[1].rotation.x = -pi / 2.0f;
 	m_ObjectState[1].rotation.y += 0.005f;
 	m_ObjectState[1].pos.x = 0.0f;
 
-	m_ObjectState[2].scale.x = 1.5f;
-	m_ObjectState[2].scale.y = 1.5f;
-	m_ObjectState[2].scale.z = 1.5f;
-	m_ObjectState[2].rotation.x = -pi / 2.0f;
+	m_ObjectState[2].scale.x = 2.0f;
+	m_ObjectState[2].scale.y = 2.0f;
+	m_ObjectState[2].scale.z = 2.0f;
+	//m_ObjectState[2].rotation.x = -pi / 2.0f;
 	m_ObjectState[2].rotation.y += 0.002f;
 	m_ObjectState[2].pos.x = 2.0f;
 }
@@ -597,6 +586,7 @@ void Renderer::ObjectRender()
 	m_Models[0].Draw(&object1_Matrix);
 	m_Models[0].Draw(&object2_Matrix);
 
+	 
 }
 
 // Render the scene.
