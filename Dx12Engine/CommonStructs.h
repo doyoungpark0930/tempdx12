@@ -6,6 +6,7 @@ using namespace DirectX::SimpleMath;
 #define MAX_BONE_INFLUENCE 4
 #define MAX_TEXTURE_NUM 5
 #define NORMALMAP_SLOT 2
+#define TickPerSecond 4800
 
 struct Vertex
 {
@@ -77,11 +78,27 @@ struct CBV_CONTAINER
 struct maxNode
 {
 	std::string name;
-	Matrix localTransform;
 	Matrix offset;
 	int mNumChildren = 0;
 	maxNode* mChildren[20]; //최대 자식 수 20개
 	maxNode* mParent = nullptr;
+
+	Vector3 decomp_t;
+	Vector4 decomp_q;
+	Vector4 decomp_u;
+	Vector3 decomp_k;
+
+	int mNumPositionKeys = 0;
+	Vector3 mPositionKeysValue[30];
+	float mPositionKeysTime[30];
+
+	int mNumRotationKeys = 0;
+	Vector4 mRotationKeysValue[30];
+	float mRotationKeysTime[30];
+
+	int mNumScaleKeys = 0;
+	Vector3 mScaleKeysValue[30];
+	float mScaleKeysTime[30];
 };
 
 struct TRI_GROUP_PER_MTL

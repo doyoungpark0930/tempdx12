@@ -246,26 +246,6 @@ void ModelLoader::testLoad(char* basePath, const char* filename)
 				{
 					while (fgets_trim(line, sizeof(line), pStream))
 					{
-
-						startPlace = strstr(line, "*LOCAL_TM");
-						if (startPlace != nullptr)
-						{
-							startPlace += strlen("*LOCAL_TM") + 1;
-							float x[3];
-							if (curNode && (sscanf_s(startPlace, "%f %f %f", &x[0], &x[1], &x[2]) == 3))
-							{
-								curNode->localTransform.m[localRow][0] = x[0];
-								curNode->localTransform.m[localRow][1] = x[1];
-								curNode->localTransform.m[localRow][2] = x[2];
-								curNode->localTransform.m[localRow][3] = 0.0f;
-
-								curNode->localTransform.m[3][3] = 1.0f;
-							}
-							else __debugbreak();
-							localRow++;
-							continue;
-						}
-
 						startPlace = strstr(line, "*Offset_TM");
 						if (startPlace != nullptr)
 						{
@@ -462,7 +442,7 @@ void ModelLoader::printNode(maxNode* node, int depth)
 	std::cout << "└─ " << node->name << " (" << node->mNumChildren << " children)" << std::endl;
 
 	// transformation 출력 (4x4)
-	for (int r = 0; r < 4; ++r)
+	/*for (int r = 0; r < 4; ++r)
 	{
 		for (int i = 0; i < depth + 1; ++i) // 들여쓰기
 			std::cout << "  ";
@@ -472,7 +452,7 @@ void ModelLoader::printNode(maxNode* node, int depth)
 			std::cout << node->localTransform.m[r][c] << " ";
 		}
 		std::cout << std::endl;
-	}
+	}*/
 
 	// 자식 노드 재귀 출력
 	for (int i = 0; i < node->mNumChildren; ++i)
@@ -614,15 +594,23 @@ void ModelLoader::ReadMapInfo(FILE* pStream, int allocatedMaterialNum)
 	if (startPlace)
 		FindStr(startPlace, mapName);
 
-	// normalmap_texture의 경우 MAP_CLASS 두 줄을 추가로 스킵
+	// normalmap_texture의 경우 
 	if (mapName == "normalmap_texture")
 	{
 		fgets_trim(line, sizeof(line), pStream);
+
+		if (strstr(line, "*TEXTURE")) //*Texture인경우 두줄스킵,아닌경우 그냥 지나감
+		{
+			fgets_trim(line, sizeof(line), pStream);
+			fgets_trim(line, sizeof(line), pStream);
+		}
+	}
+	else
+	{
 		fgets_trim(line, sizeof(line), pStream);
 	}
 
 	// BITMAP 읽기
-	fgets_trim(line, sizeof(line), pStream);
 	startPlace = strstr(line, "*BITMAP");
 	if (startPlace)
 		FindStr(startPlace, mapPath);

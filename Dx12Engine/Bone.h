@@ -24,7 +24,7 @@ class Bone
 {
 public:
 	/*reads keyframes from aiNodeAnim*/
-	void OnInit(const std::string& name, int ID, const aiNodeAnim* channel, float *duration);
+	void OnInit(const std::string& name, int ID, const maxNode* channel, float *duration);
 
 	~Bone();
 
@@ -51,6 +51,11 @@ private:
 	int m_NumPositions;
 	int m_NumRotations;
 	int m_NumScalings;
+
+	Vector3 decomp_t;
+	Quaternion decomp_q;
+	Quaternion decomp_u;
+	Vector3 decomp_k;
 
 	Matrix m_LocalTransform;
 	std::string m_Name;

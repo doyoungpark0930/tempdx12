@@ -1,61 +1,44 @@
 #include "pch.h"
-#ifdef new
-#undef new  
-#endif
-
-#include <assimp/Importer.hpp>
-#include <assimp/postprocess.h>
-#include <assimp/scene.h>
-
-
-#pragma comment(lib, "assimp-vc143-mtd.lib") 
-
-
-//메모리 릭 확인 재정의
-#ifdef _DEBUG
-#define new new(_NORMAL_BLOCK, __FILE__, __LINE__)
-#endif
 
 #include "Bone.h"
 using namespace DirectX::SimpleMath;
 
-void Bone::OnInit(const std::string& name, int ID, const aiNodeAnim* channel, float* duration)
-
+void Bone::OnInit(const std::string& name, int ID, const maxNode* node, float* duration)
 {
 	m_Name = name;
 	m_ID = ID;
 	m_LocalTransform = Matrix();
-	m_NumPositions = channel->mNumPositionKeys;
+	m_NumPositions = node->mNumPositionKeys;
 
 	for (int positionIndex = 0; positionIndex < m_NumPositions; ++positionIndex)
 	{
-		aiVector3D aiPosition = channel->mPositionKeys[positionIndex].mValue;
-		float timeStamp = channel->mPositionKeys[positionIndex].mTime;
+		Vector3 Position = node->mPositionKeysValue[positionIndex];
+		float timeStamp = node->mPositionKeysTime[positionIndex];
 		KeyPosition data;
-		data.position = Vector3(aiPosition.x, aiPosition.y, aiPosition.z);
+		data.position = Position;
 		data.timeStamp = timeStamp;
 		m_Positions.push_back(data);
 	}
 
-	m_NumRotations = channel->mNumRotationKeys;
+	m_NumRotations = node->mNumRotationKeys;
 	for (int rotationIndex = 0; rotationIndex < m_NumRotations; ++rotationIndex)
 	{
-		aiQuaternion aiOrientation = channel->mRotationKeys[rotationIndex].mValue;
-		float timeStamp = channel->mRotationKeys[rotationIndex].mTime;
+		Quaternion Orientation = node->mRotationKeysValue[rotationIndex];
+		float timeStamp = node->mRotationKeysTime[rotationIndex];
 		KeyRotation data;
-		data.orientation = Quaternion(aiOrientation.x, aiOrientation.y, aiOrientation.z, aiOrientation.w);
+		data.orientation = Orientation;
 		data.timeStamp = timeStamp;
 		m_Rotations.push_back(data);
 	}
 
 
-	m_NumScalings = channel->mNumScalingKeys;
+	m_NumScalings = node->mNumScaleKeys;
 	for (int keyIndex = 0; keyIndex < m_NumScalings; ++keyIndex)
 	{
-		aiVector3D scale = channel->mScalingKeys[keyIndex].mValue;
-		float timeStamp = channel->mScalingKeys[keyIndex].mTime;
+		Vector3 scale = node->mScaleKeysValue[keyIndex];
+		float timeStamp = node->mScaleKeysTime[keyIndex];
 		KeyScale data;
-		data.scale = Vector3(scale.x, scale.y, scale.z);
+		data.scale = scale;
 		data.timeStamp = timeStamp;
 		m_Scales.push_back(data);
 	}

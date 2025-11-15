@@ -17,7 +17,7 @@ struct AssimpNodeData
 class Animation
 {
 public:  
-    void OnInit(const std::string& animationPath, ModelLoader* model);
+    void OnInit(maxNode* rootNode, ModelLoader* model);
 
     ~Animation();
 
@@ -27,7 +27,7 @@ public:
 
     inline float GetDuration() { return m_Duration; }
 
-    inline const AssimpNodeData& GetRootNode() { return m_RootNode; }
+    inline const maxNode* GetRootNode() { return m_RootNode; }
 
     inline std::unordered_map<std::string, BoneInfo>& GetBoneIDMap()
     {
@@ -35,15 +35,12 @@ public:
     }
 
 private:
-    void ReadMissingBones(const aiAnimation* animation, ModelLoader& model);
-    void ReadHeirarchyData(AssimpNodeData& dest, aiNode* src, std::string parentName);
-    aiNode* FindBone(aiNode* src);
-    Matrix CalculatePivotMatrix(aiNode* src, Matrix parentMatrix);
+    void InitBones(const maxNode* animation, ModelLoader& model);
 
     float m_Duration;
     int m_TicksPerSecond;
     std::vector<Bone> m_Bones;
-    AssimpNodeData m_RootNode;
+    maxNode* m_RootNode;
     std::unordered_map<std::string, BoneInfo> m_BoneInfoMap;
 
     int test = 0;

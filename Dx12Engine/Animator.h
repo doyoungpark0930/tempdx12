@@ -13,7 +13,7 @@ public:
 
 	void PlayAnimation(Animation* pAnimation);
 
-	void CalculateBoneTransform(const AssimpNodeData* node, Matrix parentTransform);
+	void CalculateBoneTransform(const maxNode* node, Matrix parentTransform);
 	int testCnt = 0;
 
 	Matrix* GetFinalBoneMatrices() { return m_FinalBoneMatrices; }

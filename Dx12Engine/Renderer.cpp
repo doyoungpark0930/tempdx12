@@ -498,18 +498,18 @@ void Renderer::CreateModels()
 {
 	char basePath[512]; 
 	WideCharToMultiByte(CP_UTF8, 0, DXUtil::m_assetsResourcesPath, -1, basePath, sizeof(basePath), NULL, NULL); // wchar → MultiByte 변환 (UTF-8 기준)
-	strcat_s(basePath, sizeof(basePath), "Assasin\\");
-
-	const char* fileName = "assasin.dy";
+	strcat_s(basePath, sizeof(basePath), "Rumba\\");
+	 
+	const char* fileName = "RumbaDancing.dy";
 
 	MeshDataInfo meshesInfo = GeometryGenerator::testReadFromFile(basePath, fileName);
 
 	m_Models[0].CreateModel(meshesInfo);
 	m_ObjectState = new ObjectState[maxObjectsNum];
 }
+
 void Renderer::OnInitGlobalConstant()
 {
-
 	GLOBAL_CONSTANT* globalConstant = (GLOBAL_CONSTANT*)(m_cbvManager->GetStartCBV() + 0);
 	View = XMMatrixLookAtLH(eyePos, lookAt, up);
 	Proj = XMMatrixPerspectiveFovLH(fovY, aspect, nearZ, farZ);
@@ -534,14 +534,14 @@ void Renderer::Update(float dt)
 	m_ObjectState[0].scale.x = 3.0f;
 	m_ObjectState[0].scale.y = 3.0f;
 	m_ObjectState[0].scale.z = 3.0f;
-	//m_ObjectState[0].rotation.x = -pi/2.0f;
+	m_ObjectState[0].rotation.x = -pi/2.0f;
 	m_ObjectState[0].rotation.y = -pi / 12.0f;
 	m_ObjectState[0].pos.x = -2.0f;
 	
 	m_ObjectState[1].scale.x = 2.0f;
 	m_ObjectState[1].scale.y = 2.0f;
 	m_ObjectState[1].scale.z = 2.0f;
-	//m_ObjectState[1].rotation.x = -pi / 2.0f;
+	m_ObjectState[1].rotation.x = -pi / 2.0f;
 	m_ObjectState[1].rotation.y += 0.005f;
 	m_ObjectState[1].pos.x = 0.0f;
 
