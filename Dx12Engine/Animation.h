@@ -17,11 +17,11 @@ struct AssimpNodeData
 class Animation
 {
 public:  
-    void OnInit(maxNode* rootNode, ModelLoader* model);
+    void OnInit(maxNode* rootNode, ModelLoader* model, float duration);
 
     ~Animation();
 
-    std::vector<Bone>& GetBone() { return m_Bones; }
+    Bone* GetBone() { return m_Bones; }
 
     inline float GetTicksPerSecond() { return m_TicksPerSecond; }
 
@@ -29,19 +29,19 @@ public:
 
     inline const maxNode* GetRootNode() { return m_RootNode; }
 
-    inline std::unordered_map<std::string, BoneInfo>& GetBoneIDMap()
+    auto& GetBoneIDMap()
     {
         return m_BoneInfoMap;
     }
 
 private:
-    void InitBones(const maxNode* animation, ModelLoader& model);
+    void InitBones(const maxNode* animation);
 
     float m_Duration;
     int m_TicksPerSecond;
-    std::vector<Bone> m_Bones;
+    Bone* m_Bones;
     maxNode* m_RootNode;
-    std::unordered_map<std::string, BoneInfo> m_BoneInfoMap;
+    std::unordered_map<std::string, UINT> m_BoneInfoMap;
 
     int test = 0;
 };

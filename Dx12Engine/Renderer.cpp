@@ -498,12 +498,15 @@ void Renderer::CreateModels()
 {
 	char basePath[512]; 
 	WideCharToMultiByte(CP_UTF8, 0, DXUtil::m_assetsResourcesPath, -1, basePath, sizeof(basePath), NULL, NULL); // wchar → MultiByte 변환 (UTF-8 기준)
-	strcat_s(basePath, sizeof(basePath), "Rumba\\");
+	strcat_s(basePath, sizeof(basePath), "Mixamo\\");
 	 
-	const char* fileName = "RumbaDancing.dy";
+	const char* fileName = "mt.dy";
 
-	MeshDataInfo meshesInfo = GeometryGenerator::testReadFromFile(basePath, fileName);
+	m_animator = new Animator;
+	MeshDataInfo meshesInfo = GeometryGenerator::ReadFromFile(basePath, fileName);
 
+	m_animator->OnInit(&meshesInfo.m_animations[0], meshesInfo.m_defaultTransform);
+	meshesInfo.finalBoneMatrices = m_animator->GetFinalBoneMatrices();
 	m_Models[0].CreateModel(meshesInfo);
 	m_ObjectState = new ObjectState[maxObjectsNum];
 }
@@ -529,28 +532,28 @@ void Renderer::Update(float dt)
 	globalConstant->eyePos = Vector4(eyePos.x, eyePos.y, eyePos.z, 1.0f);
 	globalConstant->lightPos = Vector4(lightPos.x, lightPos.y, lightPos.z, 1.0f);
 
-	//m_animator->UpdateAnimation(dt);
+	m_animator->UpdateAnimation(dt);
 
 	m_ObjectState[0].scale.x = 3.0f;
 	m_ObjectState[0].scale.y = 3.0f;
 	m_ObjectState[0].scale.z = 3.0f;
-	m_ObjectState[0].rotation.x = -pi/2.0f;
-	m_ObjectState[0].rotation.y = -pi / 12.0f;
+	m_ObjectState[0].pos.y = -0.5f;
 	m_ObjectState[0].pos.x = -2.0f;
 	
-	m_ObjectState[1].scale.x = 2.0f;
-	m_ObjectState[1].scale.y = 2.0f;
-	m_ObjectState[1].scale.z = 2.0f;
-	m_ObjectState[1].rotation.x = -pi / 2.0f;
-	m_ObjectState[1].rotation.y += 0.005f;
+	m_ObjectState[1].scale.x = 3.0f;
+	m_ObjectState[1].scale.y = 3.0f;
+	m_ObjectState[1].scale.z = 3.0f;
+	//m_ObjectState[1].rotation.y += 0.005f;
 	m_ObjectState[1].pos.x = 0.0f;
+	m_ObjectState[1].pos.y = -0.5f;
 
-	m_ObjectState[2].scale.x = 2.0f;
-	m_ObjectState[2].scale.y = 2.0f;
-	m_ObjectState[2].scale.z = 2.0f;
+	m_ObjectState[2].scale.x = 3.0f;
+	m_ObjectState[2].scale.y = 3.0f;
+	m_ObjectState[2].scale.z = 3.0f;
 	//m_ObjectState[2].rotation.x = -pi / 2.0f;
-	m_ObjectState[2].rotation.y += 0.002f;
+	//m_ObjectState[2].rotation.y += 0.002f;
 	m_ObjectState[2].pos.x = 2.0f;
+	m_ObjectState[2].pos.y = -0.5f;
 }
 
 void Renderer::ObjectRender()

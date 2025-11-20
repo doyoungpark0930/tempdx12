@@ -6,7 +6,8 @@ using namespace DirectX::SimpleMath;
 #define MAX_BONE_INFLUENCE 4
 #define MAX_TEXTURE_NUM 5
 #define NORMALMAP_SLOT 2
-#define TickPerSecond 4800
+#define TicksPerSecond 4800
+#define ModelMatrixNum 128
 
 struct Vertex
 {
@@ -53,7 +54,7 @@ struct MATERIAL_CONSTANT
 
 struct SkinnedConstants
 {
-	Matrix boneTransforms[64];
+	Matrix boneTransforms[ModelMatrixNum];
 };
 
 struct ObjectState
@@ -168,6 +169,5 @@ struct MeshDataInfo {
 	UINT animationCnt = 0;
 	Matrix m_defaultTransform;
 	Matrix* finalBoneMatrices = nullptr;
-	UINT matricesNum = 0;
 
 };

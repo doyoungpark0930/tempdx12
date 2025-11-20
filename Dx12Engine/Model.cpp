@@ -173,7 +173,6 @@ void Model::CreateModel(MeshDataInfo meshesInfo)
 		existAnimation = true;
 		boneMatricesContainer = m_cbvManager->AllocAnimationMatrices();
 		m_FinalBoneMatrices = meshesInfo.finalBoneMatrices;
-		m_matricesNum = meshesInfo.matricesNum;
 		m_animations = meshesInfo.m_animations; //Model에서 animation데이터 해제하기 위함
 	}
 
@@ -211,12 +210,12 @@ void Model::Draw(const Matrix* pMatrix)
 
 	
 
-
+	
 	//AnimationUpdate
 	if (existAnimation)
 	{
 		SkinnedConstants* pSkinnedConstant = (SkinnedConstants*)boneMatricesContainer->pSystemMemAddr;
-		memcpy(pSkinnedConstant->boneTransforms, m_FinalBoneMatrices, sizeof(Matrix) * m_matricesNum);
+		memcpy(pSkinnedConstant->boneTransforms, m_FinalBoneMatrices, sizeof(Matrix) * ModelMatrixNum);
 
 	}
 

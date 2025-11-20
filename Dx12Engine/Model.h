@@ -47,7 +47,6 @@ private:
 	bool existAnimation = false;
 	CBV_CONTAINER* boneMatricesContainer = nullptr;
 	Matrix* m_FinalBoneMatrices = nullptr;
-	UINT m_matricesNum = 0;
 	Animation* m_animations = nullptr;
 
 

@@ -11,8 +11,7 @@ void Animator::OnInit(Animation* Animation, Matrix defaultTransform)
 	m_CurrentTime = 0.0;
 	m_CurrentAnimation = Animation;
 	m_defaultTransform = defaultTransform;
-	m_FinalBoneMatrices = new Matrix[matricesNum];
-	auto& boneInfoMap = m_CurrentAnimation->GetBoneIDMap();
+	m_FinalBoneMatrices = new Matrix[ModelMatrixNum];
 
 }
 
@@ -25,13 +24,6 @@ void Animator::UpdateAnimation(float dt)
 		m_CurrentTime = fmod(m_CurrentTime, m_CurrentAnimation->GetDuration());
 		CalculateBoneTransform(m_CurrentAnimation->GetRootNode(), Matrix());
 	}
-	testCnt = 0;
-}
-
-void Animator::PlayAnimation(Animation* pAnimation)
-{
-	m_CurrentAnimation = pAnimation;
-	m_CurrentTime = 0.0f;
 }
 
 void Animator::CalculateBoneTransform(const maxNode* node, Matrix parentTransform)
@@ -41,18 +33,26 @@ void Animator::CalculateBoneTransform(const maxNode* node, Matrix parentTransfor
 	Matrix nodeTransform;
 	Matrix globalTransformation;
 	auto& boneInfoMap = m_CurrentAnimation->GetBoneIDMap();
-	auto& Bones = m_CurrentAnimation->GetBone();
+	Bone* Bones = m_CurrentAnimation->GetBone();
 
 	if (boneInfoMap.find(nodeName) != boneInfoMap.end())
 	{
-		Bones[boneInfoMap[nodeName].id].Update(m_CurrentTime);
-		nodeTransform = Bones[boneInfoMap[nodeName].id].GetLocalTransform();
+		int boneIndex = boneInfoMap[nodeName];
+		Bones[boneIndex].Update(m_CurrentTime);
+		//Bones[boneIndex].Update(200);
+		nodeTransform = Bones[boneIndex].GetLocalTransform();
 
 		globalTransformation = nodeTransform * parentTransform;
+		Matrix meshWorld =
+		{
+			0.3937, 0.0000,  0.0000,  0.0000,
+			0.0000,-0.0000, -0.3937,  0.0000,
+			0.0000, 0.3937, -0.0000,  0.0000,
+			0.0000, 0.0000,  0.0000,  1.0000
+		};
+		Matrix offset = meshWorld * node->offset;
+		m_FinalBoneMatrices[boneIndex] = (m_defaultTransform.Invert() * offset* globalTransformation * m_defaultTransform).Transpose();
 
-		int index = boneInfoMap[nodeName].id;
-		Matrix offset = node->offset;
-		m_FinalBoneMatrices[index] = (m_defaultTransform.Invert() * offset * globalTransformation * m_defaultTransform).Transpose();
 		for (int i = 0; i < node->mNumChildren; i++)
 			CalculateBoneTransform(node->mChildren[i], globalTransformation);
 	}

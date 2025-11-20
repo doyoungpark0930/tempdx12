@@ -13,7 +13,7 @@ cbuffer MODEL_CONSTANT : register(b1)
 
 cbuffer SkinnedConstants : register(b2)
 {
-    Matrix boneTransforms[64];
+    Matrix boneTransforms[128];
 };
 
 struct VS_INPUT
@@ -52,16 +52,16 @@ PSInput VSMain(VS_INPUT input)
     indices[2] = input.boneIndices0.z;
     indices[3] = input.boneIndices0.w;
     
-    //float3 posModel = float3(0.0f, 0.0f, 0.0f);
-    //float3 normalModel = float3(0.0f, 0.0f, 0.0f);
-   // float3 tangentModel = float3(0.0f, 0.0f, 0.0f);
-    float3 posModel = input.pos;
-    float3 normalModel = input.normal;
-    float3 tangentModel = input.tangent;
+    float3 posModel = float3(0.0f, 0.0f, 0.0f);
+    float3 normalModel = float3(0.0f, 0.0f, 0.0f);
+    float3 tangentModel = float3(0.0f, 0.0f, 0.0f);
+    //float3 posModel = input.pos;
+    //float3 normalModel = input.normal;
+    //float3 tangentModel = input.tangent;
 
     // Uniform Scaling 가정
     // (float3x3)boneTransforms 캐스팅으로 Translation 제외
-    /*
+    
     for (int i = 0; i < 4; ++i)
     {
         if (indices[i] != 255)
@@ -73,7 +73,7 @@ PSInput VSMain(VS_INPUT input)
             tangentModel += mul(input.tangent, (float3x3) boneMatrix) * weights[i];
     
         }
-    }*/
+    }
     
     
     float4 worldPos = mul(float4(posModel, 1.0f), Model);

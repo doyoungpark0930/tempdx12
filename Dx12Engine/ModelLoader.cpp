@@ -35,7 +35,7 @@ using namespace std;
 using namespace DirectX::SimpleMath;
 
 
-void ModelLoader::testLoad(char* basePath, const char* filename)
+void ModelLoader::Load(char* basePath, const char* filename)
 {
 	this->basePath = basePath;
 	char fullPath[512];
@@ -61,6 +61,11 @@ void ModelLoader::testLoad(char* basePath, const char* filename)
 	int MESH_indent = 0;
 	int FACE_indent = 0;
 	int BONE_indent = 0;
+	int TRANSFORM_indent = 0;
+	int ANIM_Indent = 0;
+	int POS_Indent = 0;
+	int ROT_Indent = 0;
+	int SCALE_Indent = 0;
 
 	char* startPlace = nullptr; //문자열 시작 주소 파악
 
@@ -73,6 +78,9 @@ void ModelLoader::testLoad(char* basePath, const char* filename)
 	int allocatedMaterialNum = 0; //mtl하나 할당될때마다 하나씩 센다
 
 	int temp = 0;
+
+	m_animations = new Animation[1];
+
 	while (fgets_trim(line, sizeof(line), pStream)) {
 
 		//materal, mesh, index개수 받기
@@ -195,6 +203,7 @@ void ModelLoader::testLoad(char* basePath, const char* filename)
 		//HelperObject
 		if (checkTitle(line, "*HELPEROBJECT", HELPER_indent))
 		{
+			m_BoneCounter++;
 			while (fgets_trim(line, sizeof(line), pStream))
 			{
 
@@ -239,11 +248,9 @@ void ModelLoader::testLoad(char* basePath, const char* filename)
 					continue;
 				}
 
-				int TRANSFORM_indent = 0;
-				int localRow = 0;
-				int offsetRow = 0;
 				if (checkTitle(line, "*NODE_TRANSFORMATION_MATRIX", TRANSFORM_indent))
 				{
+					int offsetRow = 0;
 					while (fgets_trim(line, sizeof(line), pStream))
 					{
 						startPlace = strstr(line, "*Offset_TM");
@@ -266,6 +273,177 @@ void ModelLoader::testLoad(char* basePath, const char* filename)
 						}
 
 						if (line[TRANSFORM_indent] == '}')
+						{
+							break;
+						}
+					}
+				}
+
+				startPlace = strstr(line, "*NODE_LOCAL_TRANSFORMATION_MATRIX_DECOMPOSITION");
+				if (startPlace != nullptr)
+				{
+					fgets_trim(line, sizeof(line), pStream);
+					startPlace = strstr(line, "*TM_TRANSLATION_COMPONENTS");
+					if (startPlace != nullptr)
+					{
+						startPlace += strlen("*TM_TRANSLATION_COMPONENTS");
+						float x[3];
+						if (curNode && (sscanf_s(startPlace, "%f %f %f", &x[0], &x[1], &x[2]) == 3))
+						{
+							curNode->decomp_t.x = x[0];
+							curNode->decomp_t.y = x[1];
+							curNode->decomp_t.z = x[2];
+						}
+						else __debugbreak();
+					}
+
+					fgets_trim(line, sizeof(line), pStream);
+					startPlace = strstr(line, "*TM_ESSENTIAL_ROTATION");
+					if (startPlace != nullptr)
+					{
+						startPlace += strlen("*TM_ESSENTIAL_ROTATION");
+						float x[4];
+						if (curNode && (sscanf_s(startPlace, "%f %f %f %f", &x[0], &x[1], &x[2], &x[3]) == 4))
+						{
+							curNode->decomp_q.x = x[0];
+							curNode->decomp_q.y = x[1];
+							curNode->decomp_q.z = x[2];
+							curNode->decomp_q.w = x[3];
+						}
+						else __debugbreak();
+					}
+
+					fgets_trim(line, sizeof(line), pStream);
+					startPlace = strstr(line, "*TM_STRETCH_ROTATION");
+					if (startPlace != nullptr)
+					{
+						startPlace += strlen("*TM_STRETCH_ROTATION");
+						float x[4];
+						if (curNode && (sscanf_s(startPlace, "%f %f %f %f", &x[0], &x[1], &x[2], &x[3]) == 4))
+						{
+
+							curNode->decomp_u.x = x[0];
+							curNode->decomp_u.y = x[1];
+							curNode->decomp_u.z = x[2];
+							curNode->decomp_u.w = x[3];
+						}
+						else __debugbreak();
+					}
+
+					fgets_trim(line, sizeof(line), pStream);
+					startPlace = strstr(line, "*TM_STRETCH_FACTORS");
+					if (startPlace != nullptr)
+					{
+						startPlace += strlen("*TM_STRETCH_FACTORS");
+						float x[3];
+						if (curNode && (sscanf_s(startPlace, "%f %f %f", &x[0], &x[1], &x[2]) == 3))
+						{
+							curNode->decomp_k.x = x[0];
+							curNode->decomp_k.y = x[1];
+							curNode->decomp_k.z = x[2];
+						}
+						else __debugbreak();
+					}
+
+					fgets_trim(line, sizeof(line), pStream); //FLIP_SIGN
+					continue;
+
+
+				}
+
+				if (checkTitle(line, "*TM_ANIMATION", ANIM_Indent))
+				{
+					while (fgets_trim(line, sizeof(line), pStream))
+					{
+
+						if (checkTitle(line, "*CONTROL_POS_TRACK", POS_Indent))
+						{
+							while (fgets_trim(line, sizeof(line), pStream))
+							{
+								startPlace = strstr(line, "*CONTROL_POS_SAMPLE");
+								if (startPlace != nullptr)
+								{
+									startPlace += strlen("*CONTROL_POS_SAMPLE");
+									float x[4];
+									if (curNode && (sscanf_s(startPlace, "%f %f %f %f", &x[0], &x[1], &x[2], &x[3]) == 4))
+									{
+										curNode->mPositionKeysTime[curNode->mNumPositionKeys] = x[0];
+										curNode->mPositionKeysValue[curNode->mNumPositionKeys].x = x[1];
+										curNode->mPositionKeysValue[curNode->mNumPositionKeys].y = x[2];
+										curNode->mPositionKeysValue[curNode->mNumPositionKeys].z = x[3];
+
+										curNode->mNumPositionKeys++;
+									}
+									else __debugbreak();
+								}
+
+								if (line[POS_Indent] == '}')
+								{
+									break;
+								}
+							}
+						}
+
+						if (checkTitle(line, "*CONTROL_ROT_TRACK", ROT_Indent))
+						{
+							while (fgets_trim(line, sizeof(line), pStream))
+							{
+								startPlace = strstr(line, "*CONTROL_ROT_SAMPLE");
+								if (startPlace != nullptr)
+								{
+									startPlace += strlen("*CONTROL_ROT_SAMPLE");
+									float x[5];
+									if (curNode && (sscanf_s(startPlace, "%f %f %f %f %f", &x[0], &x[1], &x[2], &x[3], &x[4]) == 5))
+									{
+										curNode->mRotationKeysTime[curNode->mNumRotationKeys] = x[0];
+										curNode->mRotationKeysValue[curNode->mNumRotationKeys].x = x[1];
+										curNode->mRotationKeysValue[curNode->mNumRotationKeys].y = x[2];
+										curNode->mRotationKeysValue[curNode->mNumRotationKeys].z = x[3];
+										curNode->mRotationKeysValue[curNode->mNumRotationKeys].w = x[4];
+
+										curNode->mNumRotationKeys++;
+									}
+									else __debugbreak();
+								}
+								if (line[ROT_Indent] == '}')
+								{
+									break;
+								}
+							}
+						}
+
+						if (checkTitle(line, "*CONTROL_SCALE_TRACK", SCALE_Indent))
+						{
+							while (fgets_trim(line, sizeof(line), pStream))
+							{
+								startPlace = strstr(line, "*CONTROL_SCALE_SAMPLE");
+								if (startPlace != nullptr)
+								{
+									startPlace += strlen("*CONTROL_SCALE_SAMPLE");
+									float x[4];
+									if (curNode && (sscanf_s(startPlace, "%f %f %f %f", &x[0], &x[1], &x[2], &x[3]) == 4))
+									{
+										curNode->mScaleKeysTime[curNode->mNumScaleKeys] = x[0];
+										curNode->mScaleKeysValue[curNode->mNumScaleKeys].x = x[1];
+										curNode->mScaleKeysValue[curNode->mNumScaleKeys].y = x[2];
+										curNode->mScaleKeysValue[curNode->mNumScaleKeys].z = x[3];
+
+										curNode->mNumScaleKeys++;
+
+									}
+									else __debugbreak();
+								}
+
+								if (line[SCALE_Indent] == '}')
+								{
+									break;
+								}
+							}
+						}
+
+
+
+						if (line[ANIM_Indent] == '}')
 						{
 							break;
 						}
@@ -358,7 +536,7 @@ void ModelLoader::testLoad(char* basePath, const char* filename)
 				FindStr(line, boneName);
 				if (sscanf_s(line + boneName.size() + 3, "%d", &boneId) == 1)
 				{
-					m_boneInfoMap[boneName] = boneId;
+					m_BoneInfoMap[boneName] = boneId;
 				}
 
 				if (line[BONE_indent] == '}')
@@ -370,9 +548,14 @@ void ModelLoader::testLoad(char* basePath, const char* filename)
 
 	}
 	UpdateResourcePath(m_materials, m_materialNum);
+
+
+
+	m_animations[0].OnInit(rootNode, this, 4000); //임시로 값 12000그냥 넣음
 	//cout << m_materialNum << endl;
 	//cout << m_meshesNum << endl;
 	//printNode(rootNode, 0);
+
 	//PrintAllMaterialTextures(m_materials, m_materialNum);
 	if (prevMaterialNum) delete[] prevMaterialNum;
 	fclose(pStream);
@@ -441,18 +624,82 @@ void ModelLoader::printNode(maxNode* node, int depth)
 
 	std::cout << "└─ " << node->name << " (" << node->mNumChildren << " children)" << std::endl;
 
-	// transformation 출력 (4x4)
-	/*for (int r = 0; r < 4; ++r)
-	{
-		for (int i = 0; i < depth + 1; ++i) // 들여쓰기
-			std::cout << "  ";
+	// -----------------------------------------------------
+   //  Decomposed Transform 출력
+   // -----------------------------------------------------
+	for (int i = 0; i < depth + 1; ++i)
+		std::cout << "  ";
+	std::cout << "Decomposed Transform:" << std::endl;
 
-		for (int c = 0; c < 4; ++c)
+	for (int i = 0; i < depth + 2; ++i)
+		std::cout << "  ";
+	std::cout << "T = (" << node->decomp_t.x << ", " << node->decomp_t.y << ", " << node->decomp_t.z << ")\n";
+
+	for (int i = 0; i < depth + 2; ++i)
+		std::cout << "  ";
+	std::cout << "Q = (" << node->decomp_q.x << ", " << node->decomp_q.y << ", "
+		<< node->decomp_q.z << ", " << node->decomp_q.w << ")\n";
+
+	for (int i = 0; i < depth + 2; ++i)
+		std::cout << "  ";
+	std::cout << "U = (" << node->decomp_u.x << ", " << node->decomp_u.y << ", "
+		<< node->decomp_u.z << ", " << node->decomp_u.w << ")\n";
+
+	for (int i = 0; i < depth + 2; ++i)
+		std::cout << "  ";
+	std::cout << "K = (" << node->decomp_k.x << ", " << node->decomp_k.y << ", " << node->decomp_k.z << ")\n";
+
+	// -----------------------------------------------------
+	//  Position Keys
+	// -----------------------------------------------------
+	if (node->mNumPositionKeys > 0)
+	{
+		for (int i = 0; i < depth + 1; ++i) std::cout << "  ";
+		std::cout << "Position Keys (" << node->mNumPositionKeys << "):\n";
+
+		for (int k = 0; k < node->mNumPositionKeys; ++k)
 		{
-			std::cout << node->localTransform.m[r][c] << " ";
+			for (int i = 0; i < depth + 2; ++i) std::cout << "  ";
+			const Vector3& v = node->mPositionKeysValue[k];
+			std::cout << "[" << k << "] time=" << node->mPositionKeysTime[k]
+				<< "  value=(" << v.x << ", " << v.y << ", " << v.z << ")\n";
 		}
-		std::cout << std::endl;
-	}*/
+	}
+
+	// -----------------------------------------------------
+	//  Rotation Keys
+	// -----------------------------------------------------
+	if (node->mNumRotationKeys > 0)
+	{
+		for (int i = 0; i < depth + 1; ++i) std::cout << "  ";
+		std::cout << "Rotation Keys (" << node->mNumRotationKeys << "):\n";
+
+		for (int k = 0; k < node->mNumRotationKeys; ++k)
+		{
+			for (int i = 0; i < depth + 2; ++i) std::cout << "  ";
+			const Vector4& q = node->mRotationKeysValue[k];
+			std::cout << "[" << k << "] time=" << node->mRotationKeysTime[k]
+				<< "  value=(" << q.x << ", " << q.y << ", " << q.z << ", " << q.w << ")\n";
+		}
+	}
+
+	// -----------------------------------------------------
+	//  Scale Keys
+	// -----------------------------------------------------
+	if (node->mNumScaleKeys > 0)
+	{
+		for (int i = 0; i < depth + 1; ++i) std::cout << "  ";
+		std::cout << "Scale Keys (" << node->mNumScaleKeys << "):\n";
+
+		for (int k = 0; k < node->mNumScaleKeys; ++k)
+		{
+			for (int i = 0; i < depth + 2; ++i) std::cout << "  ";
+			const Vector3& s = node->mScaleKeysValue[k];
+			std::cout << "[" << k << "] time=" << node->mScaleKeysTime[k]
+				<< "  value=(" << s.x << ", " << s.y << ", " << s.z << ")\n";
+		}
+	}
+
 
 	// 자식 노드 재귀 출력
 	for (int i = 0; i < node->mNumChildren; ++i)
@@ -621,4 +868,5 @@ void ModelLoader::ReadMapInfo(FILE* pStream, int allocatedMaterialNum)
 
 ModelLoader::~ModelLoader()
 {
+
 }

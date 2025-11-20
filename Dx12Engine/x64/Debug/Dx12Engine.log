@@ -1,17 +1,14 @@
-﻿  Renderer.cpp
+﻿  ModelLoader.cpp
 C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\Animation.h(26,47): warning C4244: 'return': conversion from 'int' to 'float', possible loss of data
-  (compiling source file '/Renderer.cpp')
+  (compiling source file '/ModelLoader.cpp')
   
-C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\Renderer.cpp(168,77): warning C4390: ';': empty controlled statement found; is this the intent?
-  (compiling source file '/Renderer.cpp')
+C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\ModelLoader.cpp(107,24): warning C4018: '<': signed/unsigned mismatch
+  (compiling source file '/ModelLoader.cpp')
   
-C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\Renderer.cpp(537,35): warning C4305: '=': truncation from 'double' to 'float'
-  (compiling source file '/Renderer.cpp')
+C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\ModelLoader.cpp(115,23): warning C4018: '<': signed/unsigned mismatch
+  (compiling source file '/ModelLoader.cpp')
   
-C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\Renderer.cpp(538,36): warning C4305: '=': truncation from 'double' to 'float'
-  (compiling source file '/Renderer.cpp')
-  
-C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\Renderer.cpp(544,36): warning C4305: '=': truncation from 'double' to 'float'
-  (compiling source file '/Renderer.cpp')
+C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\ModelLoader.cpp(124,25): warning C4018: '<': signed/unsigned mismatch
+  (compiling source file '/ModelLoader.cpp')
   
   Dx12Engine.vcxproj -> C:\Users\Lenovo\source\repos\BackUpDx12\x64\Debug\Dx12Engine.exe

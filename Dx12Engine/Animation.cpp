@@ -12,28 +12,27 @@
 #include "Animation.h"
 
 using namespace std;
-void Animation::OnInit(maxNode* rootNode, ModelLoader* model)
+void Animation::OnInit(maxNode* rootNode, ModelLoader* model, float duration)
 {
 	m_RootNode = rootNode;
-	//m_Duration = animation->mDuration;
-	//cout << m_Duration << endl;
-	m_TicksPerSecond = TickPerSecond;
+	m_Duration = duration;
+	m_TicksPerSecond = TicksPerSecond;
 	m_BoneInfoMap = model->GetBoneInfoMap();
-	m_Bones.resize(model->GetBoneCount());
-	InitBones(m_RootNode, *model);
+	m_Bones = new Bone[model->GetBoneCount()];
+
+	InitBones(m_RootNode);
 }
 
 
-void Animation::InitBones(const maxNode* node, ModelLoader& model)
+void Animation::InitBones(const maxNode* node)
 {//일단 최적화 신경쓰지말고, animation대신 node를 넣어서 node순으로 쫙 bone생성하기
 
-	auto& boneInfoMap = model.GetBoneInfoMap();
-
-	m_Bones[boneInfoMap[node->name].id].OnInit(node->name, boneInfoMap[node->name].id, node, &m_Duration);
+	int boneId = m_BoneInfoMap[node->name];
+	m_Bones[boneId].OnInit(node->name, boneId, node);
 
 
 	for (int i = 0; i < node->mNumChildren; i++)
-		InitBones(node->mChildren[i], model);
+		InitBones(node->mChildren[i]);
 
 }
 
@@ -41,4 +40,5 @@ void Animation::InitBones(const maxNode* node, ModelLoader& model)
 
 Animation::~Animation()
 {
+	SafeDeleteArray(&m_Bones);
 }

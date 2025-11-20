@@ -4,46 +4,22 @@
 
 using namespace DirectX;
 
-MeshDataInfo GeometryGenerator::testReadFromFile(char* basePath, const char* filename)
+MeshDataInfo GeometryGenerator::ReadFromFile(char* basePath, const char* filename)
 {
 	ModelLoader modelLoader;
-	modelLoader.testLoad(basePath, filename);
+	modelLoader.Load(basePath, filename);
 	MeshDataInfo result;
 	result.Materials = modelLoader.m_materials;
 	result.materialNum = modelLoader.m_materialNum;
 	result.meshes = modelLoader.m_meshes;
 	result.meshNum = modelLoader.m_meshesNum;
 	result.rootNode = modelLoader.rootNode;
-	Normalize(Vector3(0.0f), 1.0f, result, modelLoader);
-
-	return result;
-
-}
-
-MeshDataInfo GeometryGenerator::ReadFromFile(char* basePath, const char* filename) {
-
-
-	ModelLoader modelLoader;
-
-	MeshDataInfo result;
-	Normalize(Vector3(0.0f), 1.0f, result, modelLoader);
-
-	return result;
-}
-
-MeshDataInfo GeometryGenerator::AnimationReadFromFile(char* basePath, const char* filename, const char** animationNames, UINT animationNum) {
-
-
-	ModelLoader modelLoader;
-
-	MeshDataInfo result;
 	result.m_animations = modelLoader.m_animations;
-	result.animationCnt = animationNum;
-	Normalize(Vector3(0.0f, 0.0f, 0.0f), 1.0f, result, modelLoader);
+	Normalize(Vector3(0.0f), 1.0f, result, modelLoader);
 
 	return result;
-}
 
+}
 void GeometryGenerator::Normalize(const Vector3 center,
 	const float longestLength,
 	MeshDataInfo& result, ModelLoader& modelLoader)
@@ -52,6 +28,7 @@ void GeometryGenerator::Normalize(const Vector3 center,
 	// Normalize vertices
 	Vector3 vmin(1000, 1000, 1000);
 	Vector3 vmax(-1000, -1000, -1000);
+
 	for (int i = 0; i < result.meshNum; i++) {
 		for (int j = 0; j < result.meshes[i].verticesNum; j++) {
 			vmin.x = XMMin(vmin.x, result.meshes[i].vertices[j].Pos.x);

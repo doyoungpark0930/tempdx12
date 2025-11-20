@@ -11,13 +11,9 @@ public:
 
 	void UpdateAnimation(float dt);
 
-	void PlayAnimation(Animation* pAnimation);
-
 	void CalculateBoneTransform(const maxNode* node, Matrix parentTransform);
-	int testCnt = 0;
 
 	Matrix* GetFinalBoneMatrices() { return m_FinalBoneMatrices; }
-	UINT matricesNum = 64;
 	~Animator();
 
 private:

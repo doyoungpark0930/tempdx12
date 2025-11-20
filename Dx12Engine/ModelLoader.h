@@ -16,11 +16,11 @@ class Animation;
 class ModelLoader {
 public:
 	~ModelLoader();
-	void testLoad(char* basePath, const char* filename);
+	void Load(char* basePath, const char* filename);
 	void UpdateResourcePath(material* m_materials, UINT m_materialNum);
 	char* UpdatePath(char* filePath);
-	auto& GetBoneInfoMap() { return m_BoneInfoMap; }
-	int& GetBoneCount() { return m_BoneCounter; }
+	auto GetBoneInfoMap() { return  m_BoneInfoMap; }
+	int GetBoneCount() { return m_BoneCounter; }
 
 public:
 	char* basePath;
@@ -38,9 +38,7 @@ public:
 	int meshCnt = 0; //Geometry들어올때 몇번째 mesh인지
 
 private:
-
-	std::unordered_map<string, BoneInfo> m_BoneInfoMap;
-	std::unordered_map<string, UINT> m_boneInfoMap;
+	std::unordered_map<std::string, UINT> m_BoneInfoMap;
 	int m_BoneCounter = 0;
 	void InsertMtlValue(int allocatedMeterialNum, std::string& mapName, std::string& mapPath);
 	void ReadMapInfo(FILE* pStream, int allocatedMaterialNum);
