@@ -1,14 +1,69 @@
-﻿  ModelLoader.cpp
-C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\Animation.h(26,47): warning C4244: 'return': conversion from 'int' to 'float', possible loss of data
+﻿  Animation.cpp
+C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\Animation.h(16,47): warning C4244: 'return': conversion from 'int' to 'float', possible loss of data
+  (compiling source file '/Animation.cpp')
+  
+  Animator.cpp
+C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\Animation.h(16,47): warning C4244: 'return': conversion from 'int' to 'float', possible loss of data
+  (compiling source file '/Animator.cpp')
+  
+  Bone.cpp
+  GeometryGenerator.cpp
+C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\GeometryGenerator.cpp(32,20): warning C4018: '<': signed/unsigned mismatch
+  (compiling source file '/GeometryGenerator.cpp')
+  
+C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\GeometryGenerator.cpp(33,21): warning C4018: '<': signed/unsigned mismatch
+  (compiling source file '/GeometryGenerator.cpp')
+  
+C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\GeometryGenerator.cpp(47,20): warning C4018: '<': signed/unsigned mismatch
+  (compiling source file '/GeometryGenerator.cpp')
+  
+C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\GeometryGenerator.cpp(48,21): warning C4018: '<': signed/unsigned mismatch
+  (compiling source file '/GeometryGenerator.cpp')
+  
+  Model.cpp
+C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\Animation.h(16,47): warning C4244: 'return': conversion from 'int' to 'float', possible loss of data
+  (compiling source file '/Model.cpp')
+  
+C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\Model.cpp(130,20): warning C4018: '<': signed/unsigned mismatch
+  (compiling source file '/Model.cpp')
+  
+C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\Model.cpp(146,21): warning C4018: '<': signed/unsigned mismatch
+  (compiling source file '/Model.cpp')
+  
+C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\Model.cpp(157,20): warning C4018: '<': signed/unsigned mismatch
+  (compiling source file '/Model.cpp')
+  
+C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\Model.cpp(165,20): warning C4018: '<': signed/unsigned mismatch
+  (compiling source file '/Model.cpp')
+  
+C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\Model.cpp(248,20): warning C4018: '<': signed/unsigned mismatch
+  (compiling source file '/Model.cpp')
+  
+C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\Model.cpp(280,21): warning C4018: '<': signed/unsigned mismatch
+  (compiling source file '/Model.cpp')
+  
+C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\Model.cpp(344,20): warning C4018: '<': signed/unsigned mismatch
+  (compiling source file '/Model.cpp')
+  
+  ModelLoader.cpp
+C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\Animation.h(16,47): warning C4244: 'return': conversion from 'int' to 'float', possible loss of data
   (compiling source file '/ModelLoader.cpp')
   
-C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\ModelLoader.cpp(107,24): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\ModelLoader.cpp(90,24): warning C4018: '<': signed/unsigned mismatch
   (compiling source file '/ModelLoader.cpp')
   
-C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\ModelLoader.cpp(115,23): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\ModelLoader.cpp(98,23): warning C4018: '<': signed/unsigned mismatch
   (compiling source file '/ModelLoader.cpp')
   
-C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\ModelLoader.cpp(124,25): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\ModelLoader.cpp(107,25): warning C4018: '<': signed/unsigned mismatch
   (compiling source file '/ModelLoader.cpp')
   
+  Renderer.cpp
+C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\Animation.h(16,47): warning C4244: 'return': conversion from 'int' to 'float', possible loss of data
+  (compiling source file '/Renderer.cpp')
+  
+C:\Users\Lenovo\source\repos\BackUpDx12\Dx12Engine\Renderer.cpp(168,77): warning C4390: ';': empty controlled statement found; is this the intent?
+  (compiling source file '/Renderer.cpp')
+  
+  Generating Code...
   Dx12Engine.vcxproj -> C:\Users\Lenovo\source\repos\BackUpDx12\x64\Debug\Dx12Engine.exe

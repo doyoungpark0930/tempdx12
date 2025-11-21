@@ -2,7 +2,6 @@
 
 class ModelLoader;
 class Animation;
-struct AssimpNodeData;
 
 class Animator
 {

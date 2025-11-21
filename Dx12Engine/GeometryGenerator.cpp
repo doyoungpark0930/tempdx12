@@ -43,10 +43,12 @@ void GeometryGenerator::Normalize(const Vector3 center,
 	float dx = vmax.x - vmin.x, dy = vmax.y - vmin.y, dz = vmax.z - vmin.z;
 	float scale = longestLength / XMMax(XMMax(dx, dy), dz);
 	Vector3 translation = -(vmin + vmax) * 0.5f + center; //원점으로 옮긴 후 + center
-
+	 
 	for (int i = 0; i < result.meshNum; i++) {
 		for (int j = 0; j < result.meshes[i].verticesNum; j++) {
 			result.meshes[i].vertices[j].Pos = (result.meshes[i].vertices[j].Pos + translation) * scale;
+			//result.meshes[i].vertices[j].Normal = (result.meshes[i].vertices[j].Normal + translation) * scale;
+
 		}
 	}
 	

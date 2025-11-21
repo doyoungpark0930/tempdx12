@@ -1,22 +1,6 @@
 ﻿#include "pch.h"
 
-// Assimp에서 new매크로와 메모리누수의 new와 충돌 제거하기 위함(pch.h에 정의됨)
-#ifdef new
-#undef new  
-#endif
-
-#include <assimp/Importer.hpp>
-#include <assimp/postprocess.h>
-#include <assimp/scene.h>
-
-
-#pragma comment(lib, "assimp-vc143-mtd.lib") 
-
-
-//메모리 릭 확인 재정의
-#ifdef _DEBUG
-#define new new(_NORMAL_BLOCK, __FILE__, __LINE__)
-#endif
+#include <iostream>
 
 #include "ModelLoader.h"
 #include "Animation.h"
@@ -25,7 +9,6 @@
 #include "CommonStructs.h"
 
 #pragma comment(lib, "DirectXMesh.lib") 
-#include <iostream>
 
 #include <cstdio>
 #include <cstdlib>
@@ -77,7 +60,7 @@ void ModelLoader::Load(char* basePath, const char* filename)
 	int* prevMaterialNum = nullptr;
 	int allocatedMaterialNum = 0; //mtl하나 할당될때마다 하나씩 센다
 
-	int temp = 0;
+	float maxDuration = 0;
 
 	m_animations = new Animation[1];
 
@@ -373,6 +356,7 @@ void ModelLoader::Load(char* basePath, const char* filename)
 										curNode->mPositionKeysValue[curNode->mNumPositionKeys].z = x[3];
 
 										curNode->mNumPositionKeys++;
+										maxDuration = max(maxDuration, x[0]);
 									}
 									else __debugbreak();
 								}
@@ -402,6 +386,7 @@ void ModelLoader::Load(char* basePath, const char* filename)
 										curNode->mRotationKeysValue[curNode->mNumRotationKeys].w = x[4];
 
 										curNode->mNumRotationKeys++;
+										maxDuration = max(maxDuration, x[0]);
 									}
 									else __debugbreak();
 								}
@@ -429,6 +414,7 @@ void ModelLoader::Load(char* basePath, const char* filename)
 										curNode->mScaleKeysValue[curNode->mNumScaleKeys].z = x[3];
 
 										curNode->mNumScaleKeys++;
+										maxDuration = max(maxDuration, x[0]);
 
 									}
 									else __debugbreak();
@@ -551,9 +537,7 @@ void ModelLoader::Load(char* basePath, const char* filename)
 
 
 
-	m_animations[0].OnInit(rootNode, this, 4000); //임시로 값 12000그냥 넣음
-	//cout << m_materialNum << endl;
-	//cout << m_meshesNum << endl;
+	m_animations[0].OnInit(rootNode, this, maxDuration); //임시로 값 12000그냥 넣음
 	//printNode(rootNode, 0);
 
 	//PrintAllMaterialTextures(m_materials, m_materialNum);
@@ -623,7 +607,7 @@ void ModelLoader::printNode(maxNode* node, int depth)
 		std::cout << "  ";
 
 	std::cout << "└─ " << node->name << " (" << node->mNumChildren << " children)" << std::endl;
-
+	/*
 	// -----------------------------------------------------
    //  Decomposed Transform 출력
    // -----------------------------------------------------
@@ -699,7 +683,7 @@ void ModelLoader::printNode(maxNode* node, int depth)
 				<< "  value=(" << s.x << ", " << s.y << ", " << s.z << ")\n";
 		}
 	}
-
+	*/
 
 	// 자식 노드 재귀 출력
 	for (int i = 0; i < node->mNumChildren; ++i)

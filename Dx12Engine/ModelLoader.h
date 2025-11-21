@@ -1,15 +1,9 @@
 #pragma once
-
-
-#include <vector> //나중에 빼야함
 #include <unordered_map>
 #include <string>
+
 using namespace std;
 
-struct aiMaterial;
-struct aiNode;
-struct aiMesh;
-struct aiScene;
 class Animation;
 
 

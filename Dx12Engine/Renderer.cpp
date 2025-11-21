@@ -498,9 +498,9 @@ void Renderer::CreateModels()
 {
 	char basePath[512]; 
 	WideCharToMultiByte(CP_UTF8, 0, DXUtil::m_assetsResourcesPath, -1, basePath, sizeof(basePath), NULL, NULL); // wchar → MultiByte 변환 (UTF-8 기준)
-	strcat_s(basePath, sizeof(basePath), "Mixamo\\");
+	strcat_s(basePath, sizeof(basePath), "Rumba\\");
 	 
-	const char* fileName = "mt.dy";
+	const char* fileName = "RumbaDancing.dy";
 
 	m_animator = new Animator;
 	MeshDataInfo meshesInfo = GeometryGenerator::ReadFromFile(basePath, fileName);
@@ -537,7 +537,7 @@ void Renderer::Update(float dt)
 	m_ObjectState[0].scale.x = 3.0f;
 	m_ObjectState[0].scale.y = 3.0f;
 	m_ObjectState[0].scale.z = 3.0f;
-	m_ObjectState[0].pos.y = -0.5f;
+	//m_ObjectState[0].rotation.y += 0.002f;
 	m_ObjectState[0].pos.x = -2.0f;
 	
 	m_ObjectState[1].scale.x = 3.0f;
@@ -545,15 +545,13 @@ void Renderer::Update(float dt)
 	m_ObjectState[1].scale.z = 3.0f;
 	//m_ObjectState[1].rotation.y += 0.005f;
 	m_ObjectState[1].pos.x = 0.0f;
-	m_ObjectState[1].pos.y = -0.5f;
 
 	m_ObjectState[2].scale.x = 3.0f;
 	m_ObjectState[2].scale.y = 3.0f;
 	m_ObjectState[2].scale.z = 3.0f;
 	//m_ObjectState[2].rotation.x = -pi / 2.0f;
-	//m_ObjectState[2].rotation.y += 0.002f;
+	//m_ObjectState[2].rotation.y += 0.001f;
 	m_ObjectState[2].pos.x = 2.0f;
-	m_ObjectState[2].pos.y = -0.5f;
 }
 
 void Renderer::ObjectRender()

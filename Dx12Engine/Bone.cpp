@@ -1,19 +1,19 @@
 #include "pch.h"
-
 #include "Bone.h"
 using namespace DirectX::SimpleMath;
 
 void Bone::OnInit(const std::string& name, UINT ID, const maxNode* node)
 {
-	m_Name = name;
-	m_ID = ID;
-	m_LocalTransform = Matrix();
-
-
 	Vector3 rtmAxis(node->decomp_q.x, node->decomp_q.y, node->decomp_q.z);
 	float rtmAngle = node->decomp_q.w;
-	Quaternion rtmQ = Quaternion::CreateFromAxisAngle(rtmAxis, rtmAngle);
+	Quaternion rtmQ = Quaternion(0.0f, 0.0f, 0.0f, 1.0f);
 	rtmQ.Normalize();
+
+	if (rtmAxis.LengthSquared() > 1e-6f)
+	{
+		rtmQ = Quaternion::CreateFromAxisAngle(rtmAxis, rtmAngle);
+		rtmQ.Normalize();
+	}
 
 	Vector3 srtmAxis(node->decomp_u.x, node->decomp_u.y, node->decomp_u.z);
 	float srtmAngle = node->decomp_u.w;
@@ -73,8 +73,8 @@ void Bone::Update(float animationTime)
 	Matrix stm = InterpolateScaling(animationTime);
 
 	m_LocalTransform = m_srtmInv * stm * m_srtm * rtm * ptm;
-		//m_srtmInv * m_stm * m_srtm * m_rtm * m_ptm;
-		//m_srtmInv * stm * m_srtm * rtm * ptm;
+	//m_srtmInv * m_stm * m_srtm * m_rtm * m_ptm;
+	//m_srtmInv * stm * m_srtm * rtm * ptm;
 }
 
 /* Gets the current index on mKeyPositions to interpolate to based on
@@ -86,7 +86,8 @@ int Bone::GetPositionIndex(float animationTime)
 		if (animationTime < m_Positions[index + 1].timeStamp)
 			return index;
 	}
-	assert(0);
+	//assert(0);
+	return m_NumPositions - 2;
 }
 
 /* Gets the current index on mKeyRotations to interpolate to based on the
@@ -98,7 +99,7 @@ int Bone::GetRotationIndex(float animationTime)
 		if (animationTime < m_Rotations[index + 1].timeStamp)
 			return index;
 	}
-	assert(0);
+	return m_NumRotations - 2;
 }
 
 /* Gets the current index on mKeyScalings to interpolate to based on the
@@ -110,7 +111,7 @@ int Bone::GetScaleIndex(float animationTime)
 		if (animationTime < m_Scales[index + 1].timeStamp)
 			return index;
 	}
-	assert(0);
+	return m_NumScalings - 2;
 }
 
 /* Gets normalized value for Lerp & Slerp*/
@@ -147,7 +148,7 @@ Matrix Bone::InterpolatePosition(float animationTime)
 and returns the rotation matrix*/
 Matrix Bone::InterpolateRotation(float animationTime)
 {
-	if (m_NumRotations < 2) 
+	if (m_NumRotations < 2)
 	{
 		return m_rtm;
 	}
